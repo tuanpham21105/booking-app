@@ -1,33 +1,95 @@
-# AGENTS.md
+# AGENTS.md - Backend Guidelines (NestJS 12 + Clean Architecture)
 
-## NestJS
+Tài liệu hướng dẫn cụ thể cho AI Agent khi làm việc trong thư mục `backend/`.
 
-This app's version of NestJS is likely newer than what you know. https://docs.nestjs.com/llms.txt indexes its documentation, with a markdown page per chapter.
+---
 
-Nest has first-party packages for these, so check them before adding another library or writing your own:
+## 1. Công nghệ & Thư viện quy chuẩn
 
-- Databases: [`@nestjs/typeorm`](https://docs.nestjs.com/data/typeorm.md), [`@nestjs/drizzle`](https://docs.nestjs.com/data/drizzle.md), [`@nestjs/mongoose`](https://docs.nestjs.com/data/mongodb.md), [`@nestjs/sequelize`](https://docs.nestjs.com/data/sequelize.md).
-- OpenAPI: [`@nestjs/swagger`](https://docs.nestjs.com/openapi/introduction.md). GraphQL: [`@nestjs/graphql`](https://docs.nestjs.com/graphql/quick-start.md). WebSockets: [`@nestjs/websockets`](https://docs.nestjs.com/websockets/gateways.md). Microservices: [`@nestjs/microservices`](https://docs.nestjs.com/microservices/basics.md).
-- Sign-in: [`@nestjs/authentication`](https://docs.nestjs.com/security/authentication.md). Permissions: [`@nestjs/authorization`](https://docs.nestjs.com/security/authorization.md). Rate limiting: [`@nestjs/throttler`](https://docs.nestjs.com/security/rate-limiting.md).
-- Configuration: [`@nestjs/config`](https://docs.nestjs.com/application/configuration.md). Caching: [`@nestjs/cache-manager`](https://docs.nestjs.com/data/caching.md). Health checks: [`@nestjs/terminus`](https://docs.nestjs.com/reliability/terminus.md). Events inside the app: [`@nestjs/event-emitter`](https://docs.nestjs.com/application/events.md).
-- Email: [`@nestjs/mail`](https://docs.nestjs.com/application/mail.md). Files, S3 included: [`@nestjs/storage`](https://docs.nestjs.com/application/file-storage.md). Translations: [`@nestjs/i18n`](https://docs.nestjs.com/application/i18n.md).
-- Retries, timeouts and circuit breakers: [`@nestjs/resilience`](https://docs.nestjs.com/reliability/resilience.md).
-- Idempotency keys: [`@nestjs/idempotency`](https://docs.nestjs.com/reliability/idempotency.md). Transactional outbox: [`@nestjs/outbox`](https://docs.nestjs.com/reliability/outbox.md). Sending and receiving webhooks: [`@nestjs/webhooks`](https://docs.nestjs.com/http/webhooks.md).
-- Queues: [`@nestjs/bullmq`](https://docs.nestjs.com/application/queues.md). Scheduled jobs: [`@nestjs/schedule`](https://docs.nestjs.com/application/task-scheduling.md).
-- Running a scheduled job on one instance, and locks: [`@nestjs/locks`](https://docs.nestjs.com/reliability/locks.md). Processes that take days: [`@nestjs/workflows`](https://docs.nestjs.com/reliability/workflows.md).
-- Language models, tools and agents: [`@nestjs/ai`](https://docs.nestjs.com/ai/overview.md). MCP servers: [`@nestjs/mcp`](https://docs.nestjs.com/mcp/overview.md).
+- **Framework**: NestJS v12 + TypeScript
+- **Package Manager**: `pnpm` (bắt buộc)
+- **Database**: **PostgreSQL 16-alpine**
+- **ORM / Data Access**: **TypeORM** (`@nestjs/typeorm`, `typeorm`, `pg`)
+- **Authentication**: **`@nestjs/authentication`** (NestJS official authentication package)
+- **Validation**: `class-validator` + `class-transformer`
+- **Documentation**: `@nestjs/swagger`
+- **Linter**: `oxlint` (`pnpm lint`)
+- **Unit Test**: Jest (`pnpm test`, `pnpm test:cov`), độ phủ Service / Use Case **$\ge 60\%$**
 
-Validation works with Zod, Valibot, ArkType or any other Standard Schema library, with no classes or decorator metadata: `StandardSchemaValidationPipe` with `@Body({ schema })` or `@Param('id', { schema })` (https://docs.nestjs.com/application/validation.md). `class-validator` still works, through `ValidationPipe`.
+---
 
-`NodeAdapter` from `@nestjs/platform-node` is the fastest HTTP adapter, ahead of Fastify (https://docs.nestjs.com/http/performance.md).
+## 2. Kiến trúc Clean Architecture bổ dọc (Vertical Slice Clean Architecture)
 
-Nest's packages are ESM only. A CommonJS project loads them through `require(esm)`, which needs Node.js 20.19+ or 22.12+, and doesn't have to convert (https://docs.nestjs.com/migration-guide.md).
+Hệ thống được tổ chức theo module chức năng (Vertical Slices). Mỗi module tự đóng gói trọn vẹn các lớp của Clean Architecture:
 
-## Production data: NestJS Observe
+```
+backend/src/
+├── main.ts
+├── app.module.ts
+│
+├── common/                              # Tài nguyên dùng chung (Shared Kernel)
+│   ├── domain/                          # Base Entity, Value Objects, Domain Errors, Interfaces
+│   ├── application/                     # Base UseCase, Result/Either pattern, Common DTOs
+│   ├── infrastructure/                  # TypeORM Base Repository, PostgreSQL 16 config, Logging
+│   └── presentation/                    # Global Exception Filters, Pipes, Guards, Decorators
+│
+└── modules/
+    └── <feature_name>/                  # Ví dụ: auth, services, bookings, providers
+        ├── domain/                      # 1. Lõi nghiệp vụ (Domain Layer)
+        │   ├── entities/                # Pure Domain Entities (không phụ thuộc TypeORM)
+        │   ├── value-objects/           # Giá trị bất biến (Money, Email, TimeRange)
+        │   ├── repositories/            # Repository Interfaces (Ports)
+        │   └── exceptions/              # Lỗi nghiệp vụ chuyên biệt
+        │
+        ├── application/                 # 2. Logic ứng dụng (Application Layer)
+        │   ├── use-cases/               # Use cases / Commands / Queries cụ thể
+        │   ├── dto/                     # Application DTOs (Request / Response DTOs)
+        │   └── ports/                   # External service interfaces (Email, Payment)
+        │
+        ├── infrastructure/              # 3. Hạ tầng & Cơ sở dữ liệu (Infrastructure Layer)
+        │   ├── persistence/
+        │   │   ├── entities/            # TypeORM Entity Schemas (ORM Entities)
+        │   │   ├── mappers/             # Mapper chuyển đổi ORM Entity <-> Domain Entity
+        │   │   └── repositories/        # TypeORM Repository Implementations (Adapters)
+        │   └── adapters/                # External service implementations
+        │
+        ├── presentation/                # 4. Giao tiếp bên ngoài (Presentation Layer)
+        │   ├── controllers/             # NestJS Controllers
+        │   ├── dto/                     # Request validation DTOs (class-validator)
+        │   └── presenters/              # Response view-models / Swagger schemas
+        │
+        └── <feature_name>.module.ts     # NestJS Module wiring dependencies
+```
 
-This app's production telemetry - traces, errors, logs and metrics - goes to [NestJS Observe](https://observe.nestjs.com). Until `ObserveModule` is registered in `src/app.module.ts`, nothing is sent: `npx @nestjs/observe link` sets it up in one step - it installs `@nestjs/observe`, wires it into the app, and writes the key pair (`OBSERVE_APP_KEY`, `OBSERVE_APP_SECRET`) to `.env`.
+### Nguyên tắc phụ thuộc (Dependency Rule)
+- `Domain` không phụ thuộc bất kỳ layer nào khác, không chứa decorator của TypeORM hay NestJS.
+- `Application` chỉ phụ thuộc `Domain`.
+- `Infrastructure` và `Presentation` phụ thuộc `Application` và `Domain`.
+- Giao tiếp giữa `Application` và `Infrastructure` thông qua Repository Interfaces (Dependency Inversion).
 
-When a task depends on how the app behaves in production - an error users hit, a slow endpoint, a failing job, whether a release made things worse - work from that data, not from the code alone:
+---
 
-- The Observe MCP server answers those questions directly: errors with their traces and logs, slow operations, jobs, and what a release changed (`find_regressions`, `diff_release`). It is included on the Pro plan and above. In Claude Code: `claude mcp add observe --transport http https://observe-api.nestjs.com/mcp`, and the client opens a browser to approve. Other clients: https://www.observe.nestjs.com/documentation/mcp
-- Without it, the user can open the request or error in the Observe dashboard and click **Copy agent prompt**, which hands over that page's trace, stack and logs as text.
+## 3. Quy định về Authentication (`@nestjs/authentication`)
+
+- Sử dụng package official `@nestjs/authentication`.
+- Tách biệt logic xác thực (Auth Use Cases) tại `modules/auth/application/use-cases/`.
+- Bảo vệ các endpoint bằng Guards và Decorators tại `common/presentation/`.
+
+---
+
+## 4. Quy định về Database & PostgreSQL 16-alpine
+
+- Mọi entity database đều ánh xạ chuẩn xác với PostgreSQL 16.
+- Sử dụng TypeORM Migrations để quản lý thay đổi schema, **không dùng `synchronize: true` trong môi trường production**.
+- Luôn kiểm tra và xin phép Developer trước khi chạy sinh migration mới.
+
+---
+
+## 5. Lệnh kiểm tra bắt buộc (Verification Commands)
+
+Trước khi bàn giao code:
+```bash
+pnpm lint        # Kiểm tra linter oxlint
+pnpm build       # Biên dịch TypeScript
+pnpm test:cov    # Chạy unit tests và kiểm tra coverage >= 60%
+```
