@@ -1,132 +1,172 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Booking App - Backend Service
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Phân hệ dịch vụ Backend cho hệ thống **Booking App** (Hệ thống Đặt lịch Dịch vụ), được xây dựng trên nền tảng **NestJS v12** theo kiến trúc **Clean Architecture bổ dọc (Vertical Slice Clean Architecture)**.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+---
 
-## Description
+## 1. Công nghệ sử dụng (Tech Stack)
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- **Framework**: [NestJS](https://nestjs.com/) v12 + TypeScript
+- **Package Manager**: `pnpm` (bắt buộc)
+- **Cơ sở dữ liệu**: **PostgreSQL 16-alpine**
+- **ORM / Persistence**: **TypeORM** (`@nestjs/typeorm`, `typeorm`, `pg`)
+- **Authentication & Authorization**: **`@nestjs/authentication`** (official package mới của NestJS) kết hợp JWT và RBAC
+- **Validation & Transformation**: `class-validator`, `class-transformer`
+- **API Documentation**: `@nestjs/swagger` (OpenAPI)
+- **Linter & Formatter**: `oxlint`, `prettier`
+- **Kiểm thử (Testing)**: Jest (`ts-jest`), độ phủ kiểm thử Service/Use Case $\ge 60\%$
 
-## Project setup
+---
 
-```bash
-$ pnpm install
+## 2. Kiến trúc Clean Architecture bổ dọc (Vertical Slice)
+
+Hệ thống backend được tổ chức theo module chức năng (Vertical Slices). Mỗi module tự đóng gói trọn vẹn 4 tầng của Clean Architecture:
+
+```
+backend/src/
+├── main.ts                              # Điểm khởi chạy ứng dụng (Bootstrap, Swagger, ValidationPipe)
+├── app.module.ts                        # Root module điều phối
+│
+├── common/                              # Tài nguyên dùng chung (Shared Kernel)
+│   ├── domain/                          # Base Entity, Value Objects, Domain Errors, Interfaces
+│   ├── application/                     # Base UseCase, Result/Either pattern, Common DTOs
+│   ├── infrastructure/                  # TypeORM Base Repository, PostgreSQL config, Logging
+│   └── presentation/                    # Global Exception Filters, Pipes, Guards, Decorators
+│
+└── modules/
+    └── <feature_name>/                  # Ví dụ: auth, services, bookings, providers, reports
+        ├── domain/                      # 1. Lõi nghiệp vụ (Domain Layer)
+        │   ├── entities/                # Pure Domain Entities (không phụ thuộc framework/ORM)
+        │   ├── value-objects/           # Giá trị bất biến (Money, Email, TimeRange, Capacity)
+        │   ├── repositories/            # Repository Interfaces (Ports)
+        │   └── exceptions/              # Lỗi nghiệp vụ chuyên biệt (OverbookingException, v.v.)
+        │
+        ├── application/                 # 2. Logic ứng dụng (Application Layer)
+        │   ├── use-cases/               # Use cases / Commands / Queries cụ thể
+        │   ├── dto/                     # Application Request / Response DTOs
+        │   └── ports/                   # External service interfaces (Payment, Notification)
+        │
+        ├── infrastructure/              # 3. Hạ tầng & Cơ sở dữ liệu (Infrastructure Layer)
+        │   ├── persistence/
+        │   │   ├── entities/            # TypeORM Entity Schemas (ORM Entities)
+        │   │   ├── mappers/             # Mapper chuyển đổi ORM Entity <-> Domain Entity
+        │   │   └── repositories/        # TypeORM Repository Implementations (Adapters)
+        │   └── adapters/                # Triển khai các external services
+        │
+        ├── presentation/                # 4. Giao tiếp bên ngoài (Presentation Layer)
+        │   ├── controllers/             # NestJS Controllers xử lý HTTP Requests
+        │   ├── dto/                     # Request validation DTOs (class-validator)
+        │   └── presenters/              # Response View-Models / Swagger schemas
+        │
+        └── <feature_name>.module.ts     # NestJS Module wiring dependencies cho slice
 ```
 
-## Compile and run the project
+### Nguyên tắc phụ thuộc (Dependency Rule)
+- **Domain**: Độc lập hoàn toàn, không phụ thuộc NestJS, TypeORM hay bất kỳ thư viện bên ngoài nào.
+- **Application**: Chỉ phụ thuộc Domain; điều phối use-case thông qua các Port/Interface.
+- **Infrastructure & Presentation**: Đóng vai trò Adapters, phụ thuộc vào Application và Domain.
+- Giao tiếp giữa `Application` và `Infrastructure` thông qua Repository Interfaces (Dependency Inversion Principle).
+
+---
+
+## 3. Yêu cầu môi trường & Cài đặt (Prerequisites & Setup)
+
+### Yêu cầu tiên quyết
+- **Node.js**: phiên bản `>= 20.x` hoặc `>= 22.x`
+- **pnpm**: phiên bản `>= 9.x` (`npm install -g pnpm`)
+- **PostgreSQL**: phiên bản 16 (khuyến nghị chạy qua Docker)
+
+### Cài đặt dependencies
+Di chuyển vào thư mục `backend/` và chạy lệnh:
 
 ```bash
-# development
-$ pnpm run start
-
-# watch mode
-$ pnpm run start:dev
-
-# production mode
-$ pnpm run start:prod
+pnpm install
 ```
 
-## Run tests
+### Cấu hình biến môi trường
+Tạo file `.env` từ file mẫu `.env.example`:
 
 ```bash
-# unit tests
-$ pnpm run test
-
-# e2e tests
-$ pnpm run test:e2e
-
-# test coverage
-$ pnpm run test:cov
+cp .env.example .env
 ```
 
-## Deployment
+Các biến môi trường cơ bản cần cấu hình:
+- `PORT`: Cổng chạy HTTP server (mặc định: `3000`)
+- `DB_HOST`: Địa chỉ máy chủ PostgreSQL (mặc định: `localhost`)
+- `DB_PORT`: Cổng PostgreSQL (mặc định: `5432`)
+- `DB_USERNAME`: Tài khoản cơ sở dữ liệu
+- `DB_PASSWORD`: Mật khẩu cơ sở dữ liệu
+- `DB_DATABASE`: Tên database (ví dụ: `booking_app`)
+- `JWT_SECRET`: Khóa bí mật ký JWT token
+- `JWT_EXPIRES_IN`: Thời gian hết hạn của JWT (ví dụ: `1d` hoặc `3600s`)
+- `CORS_ORIGIN`: Domain frontend được phép truy cập (ví dụ: `http://localhost:5173`)
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+---
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+## 4. Các lệnh thực thi (Available Scripts)
 
 ```bash
-$ pnpm install -g @nestjs/mau
-$ mau deploy
+# Khởi chạy chế độ phát triển (hot reload)
+pnpm run start:dev
+
+# Khởi chạy chế độ debug
+pnpm run start:debug
+
+# Biên dịch dự án sang JavaScript (dist/)
+pnpm run build
+
+# Khởi chạy môi trường production
+pnpm run start:prod
+
+# Kiểm tra linter với Oxlint (type-aware)
+pnpm run lint
+
+# Tự động định dạng code với Prettier
+pnpm run format
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+---
 
-## Observability
+## 5. Kiểm thử (Testing)
 
-In production applications, observability is essential for understanding how your system behaves, detecting issues early, and maintaining reliable performance.
-
-[NestJS Observe](https://observe.nestjs.com) automatically instruments your NestJS application, giving you deep visibility into your system with minimal setup:
-
-- **Distributed tracing:** Follow requests across services and understand how they flow through your system.
-- **Waterfall analysis:** Visualize request execution and identify slow operations, bottlenecks, and unexpected delays.
-- **Performance analysis:** Analyze application performance in real time and quickly pinpoint areas that need optimization.
-- **Metrics:** Track key application and infrastructure metrics to understand system health and performance trends.
-- **Logging:** Centralize and correlate logs with traces and other telemetry to make debugging easier.
-- **Error tracking:** Detect errors quickly and investigate their root causes with the surrounding context.
-- **SLA monitoring:** Track service-level objectives and identify when your application is approaching or exceeding defined thresholds.
-- **Alarms and alerts:** Set up alerts for critical errors, performance degradation, SLA violations, and other anomalies so your team can react quickly.
-
-To add it to this project, run this and approve the code it prints at [observe.nestjs.com/link](https://observe.nestjs.com/link) - signing up for free if you have no account:
+Dự án sử dụng **Jest** cho toàn bộ hệ thống kiểm thử:
 
 ```bash
-$ npx @nestjs/observe link
+# Chạy unit tests
+pnpm run test
+
+# Chạy unit tests theo dõi thay đổi (watch mode)
+pnpm run test:watch
+
+# Chạy unit tests và xuất báo cáo độ phủ (Coverage Report)
+pnpm run test:cov
+
+# Chạy kiểm thử tích hợp đầu-cuối (End-to-End)
+pnpm run test:e2e
 ```
 
-It installs `@nestjs/observe`, wires it into `AppModule` and `main.ts`, and writes the app key and secret into `.env`, which every `nest start` script (`start`, `start:dev`, `start:debug`) then loads. In production, set `OBSERVE_APP_KEY` and `OBSERVE_APP_SECRET` in the environment instead.
+> **Tiêu chuẩn chất lượng (DoD)**: Mọi Service / Use Case mới phải đạt độ phủ kiểm thử unit test $\ge 60\%$.
 
-Or do it by hand:
+---
 
-```bash
-$ pnpm install @nestjs/observe
-```
+## 6. Cơ sở dữ liệu & Migrations (PostgreSQL 16)
 
-Then follow the [setup guide](https://docs.nestjs.com/observability/sdk) - it takes a single import and an app key.
+- Mọi entity database đều ánh xạ chuẩn xác với PostgreSQL 16.
+- Sử dụng **TypeORM Migrations** để quản lý thay đổi schema.
+- **Lưu ý**: Tuyệt đối không bật `synchronize: true` trong môi trường Production để bảo toàn dữ liệu.
 
-The free plan needs no payment details and covers 300,000 events a month. You can also browse the [live demo](https://www.observe-demo.nestjs.com/dashboard) first - the whole dashboard over a busy service's data, with nothing to install.
+---
 
-## Resources
+## 7. Tài liệu API (Swagger UI)
 
-Check out a few resources that may come in handy when working with NestJS:
+Khi ứng dụng backend đang chạy, tài liệu OpenAPI / Swagger UI được tự động phát sinh tại:
+- **URL**: `http://localhost:3000/api/docs`
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Auto-instrument your application with [NestJS Observe](https://observe.nestjs.com). Distributed tracing, metrics, and logging made easy. Error tracking and performance monitoring for your NestJS applications.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+---
 
-## Support
+## 8. Hướng dẫn dành cho AI Agent & Developer
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+- Trước khi thực hiện thay đổi, vui lòng đọc kỹ:
+  - [Root AGENTS.md](../AGENTS.md) - Ranh giới an toàn và quy tắc phát triển tổng thể.
+  - [Backend AGENTS.md](./AGENTS.md) - Quy chuẩn chi tiết cho Backend.
+  - [.agent/context/01-workflow-and-ai-rules.md](../.agent/context/01-workflow-and-ai-rules.md) - Quy trình Git và mẫu khai báo AI Attribution (Course 9).

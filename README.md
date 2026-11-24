@@ -53,7 +53,7 @@ Dự án được chia tách thành hai phân hệ độc lập (Backend và Fro
 booking-app/
 ├── .agent/                  # Ngữ cảnh và quy định làm việc cho AI Agent
 │   └── context/
-│       └── 03-workflow-and-ai-rules.md  # Quy trình Git & mẫu khai báo AI
+│       └── 01-workflow-and-ai-rules.md  # Quy trình Git & mẫu khai báo AI
 │
 ├── backend/                 # Phân hệ Backend (NestJS 12)
 │   ├── src/
