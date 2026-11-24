@@ -1,5 +1,6 @@
 # ĐẶC TẢ YÊU CẦU NGHIỆP VỤ (REQUIREMENTS SPECIFICATION)
 ## DỰ ÁN: BOOKING APP (DEMO VERSION)
+### Version: 1
 
 ---
 
