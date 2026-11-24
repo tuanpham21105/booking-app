@@ -1,1 +1,11 @@
 *.dbdiagram
+
+# Environment variable files
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# OS & Logs
+.DS_Store
+*.log

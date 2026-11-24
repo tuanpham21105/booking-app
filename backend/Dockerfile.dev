@@ -1,0 +1,21 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Cài đặt pnpm
+RUN npm install -g pnpm@latest
+
+# Sao chép manifest dependencies để tận dụng Docker cache
+COPY package.json pnpm-lock.yaml ./
+
+# Cài đặt dependencies (bao gồm devDependencies cho chế độ watch/hot-reload)
+RUN pnpm install
+
+# Sao chép toàn bộ mã nguồn
+COPY . .
+
+# Mở cổng dịch vụ backend NestJS
+EXPOSE 3000
+
+# Khởi chạy ứng dụng ở chế độ dev với watch hot-reload
+CMD ["pnpm", "run", "start:dev"]

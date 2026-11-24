@@ -1,0 +1,18 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Sao chép manifest dependencies để tận dụng Docker cache
+COPY package.json package-lock.json ./
+
+# Cài đặt dependencies
+RUN npm install
+
+# Sao chép toàn bộ mã nguồn
+COPY . .
+
+# Mở cổng dịch vụ frontend Vite
+EXPOSE 5173
+
+# Khởi chạy Vite dev server lắng nghe trên tất cả network interfaces
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]

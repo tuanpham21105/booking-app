@@ -1,6 +1,6 @@
 # Booking App (Hệ thống Đặt lịch Dịch vụ)
 
-> **Lưu ý**: Đây là tài liệu mô tả sơ bộ tổng quan ban đầu của dự án. Các nội dung chi tiết về triển khai, hướng dẫn chạy dự án (Local run / Docker Compose) và tài liệu API sẽ được cập nhật liên tục trong các giai đoạn phát triển tiếp theo.
+> **Lưu ý**: Đây là tài liệu mô tả tổng quan và hướng dẫn triển khai môi trường phát triển của dự án. Xem mục [5. Hướng dẫn khởi chạy môi trường Dev Local](#5-hướng-dẫn-khởi-chạy-môi-trường-dev-local-local-development-guide) để bắt đầu phát triển.
 
 ---
 
@@ -61,6 +61,7 @@ booking-app/
 │   │   └── modules/         # Các lát cắt tính năng (Vertical Slice: Domain, Application, Infra, Presentation)
 │   ├── test/                # Kiểm thử E2E và cấu hình Jest
 │   ├── AGENTS.md            # Hướng dẫn chi tiết cho Agent khi làm việc ở Backend
+│   ├── Dockerfile.dev       # Dockerfile môi trường dev cho Backend
 │   └── package.json
 │
 ├── frontend/                # Phân hệ Frontend (React 19 + Vite)
@@ -70,11 +71,14 @@ booking-app/
 │   │   ├── lib/             # Cấu hình Axios, React Query
 │   │   └── routes/          # Hệ thống routing và Route Guards
 │   ├── AGENTS.md            # Hướng dẫn chi tiết cho Agent khi làm việc ở Frontend
+│   ├── Dockerfile.dev       # Dockerfile môi trường dev cho Frontend
 │   └── package.json
 │
 ├── docs/                    # Tài liệu đề bài và hướng dẫn chuyên môn
 │   └── Assignment.md
 │
+├── .env.dev.example         # File biến môi trường mẫu cho Docker Compose Dev
+├── docker-compose.dev.yml   # File Docker Compose khởi chạy PostgreSQL 16, Backend và Frontend
 ├── AGENTS.md                # Quy tắc an toàn và chỉ dẫn gốc cho toàn bộ dự án
 └── README.md                # Tài liệu tổng quan dự án
 ```
@@ -88,3 +92,127 @@ booking-app/
    - Mỗi module tự đóng gói 4 tầng rõ ràng: `domain` (nghiệp vụ thuần túy), `application` (use cases), `infrastructure` (kết nối TypeORM và cơ sở dữ liệu), `presentation` (REST controllers và Swagger).
 2. **Frontend - Feature-Based Architecture (Chuẩn Bulletproof React)**:
    - Các tài nguyên liên quan đến từng tính năng (giao diện, hooks gọi API, kiểu dữ liệu) được quy tụ về một thư mục trong `features/`, đảm bảo tính đồng bộ tư duy với backend và dễ mở rộng khi dự án lớn dần.
+
+---
+
+## 5. Hướng dẫn khởi chạy môi trường Dev Local (Local Development Guide)
+
+Dự án cung cấp cấu hình [docker-compose.dev.yml](file:///home/tuan-pham/Documents/Work_Projects/TrinityTech/booking-app/docker-compose.dev.yml) để khởi chạy toàn diện môi trường phát triển bao gồm: **PostgreSQL 16-alpine**, **Backend (NestJS 12)** và **Frontend (React 19 + Vite 8)**.
+
+### 5.1. Yêu cầu hệ thống (Prerequisites)
+- [Docker Engine](https://docs.docker.com/engine/install/) phiên bản $\ge 20.10$ hoặc [Docker Desktop](https://www.docker.com/products/docker-desktop/).
+- [Docker Compose](https://docs.docker.com/compose/) phiên bản v2 trở lên (lệnh `docker compose`).
+- *(Tùy chọn cho Hybrid Dev)*: Node.js 20+, `pnpm` (backend), `npm` (frontend).
+
+### 5.2. Chuẩn bị biến môi trường (Environment Configuration)
+Trước khi khởi chạy, tạo file cấu hình môi trường từ file mẫu [.env.dev.example](file:///home/tuan-pham/Documents/Work_Projects/TrinityTech/booking-app/.env.dev.example):
+
+```bash
+cp .env.dev.example .env
+```
+
+> [!IMPORTANT]
+> **Ranh giới an toàn**: Tuyệt đối **KHÔNG** commit các file `.env` hoặc file chứa secret lên Git repository. File `.gitignore` ở root và các phân hệ đã được cấu hình tự động loại trừ các file này.
+
+Bảng các biến môi trường cấu hình cơ bản:
+| Biến môi trường | Giá trị mặc định | Giải thích |
+| :--- | :--- | :--- |
+| `POSTGRES_USER` | `postgres` | Tên người dùng quản trị PostgreSQL |
+| `POSTGRES_PASSWORD` | `postgres` | Mật khẩu truy cập PostgreSQL |
+| `POSTGRES_DB` | `booking_db` | Tên cơ sở dữ liệu cho dự án |
+| `POSTGRES_PORT` | `5432` | Cổng map ra máy host của PostgreSQL |
+| `BACKEND_PORT` / `PORT` | `3000` | Cổng phục vụ API của NestJS Backend |
+| `DB_HOST` | `postgres` | Tên hostname nội bộ của service database trong mạng Docker |
+| `FRONTEND_PORT` | `5173` | Cổng truy cập Web UI của React + Vite |
+| `VITE_API_URL` | `http://localhost:3000` | URL endpoint Backend mà Frontend sẽ gọi |
+
+### 5.3. Khởi chạy toàn bộ hệ thống bằng Docker Compose
+
+File `docker-compose.dev.yml` đã được cấu hình sẵn cơ chế **Volume Mounts**:
+- Thư mục mã nguồn `backend` và `frontend` được mount trực tiếp vào container, hỗ trợ **Hot-reload / HMR** tức thì khi lưu code mà không cần build lại image.
+- `node_modules` và `dist` được cách ly qua anonymous volume nhằm tránh xung đột binary giữa máy host và container Linux Alpine.
+
+#### Lựa chọn 1: Khởi chạy nhanh (Tự động build image nếu chưa có và chạy nền)
+```bash
+docker compose -f docker-compose.dev.yml up -d --build
+```
+
+#### Lựa chọn 2: Tách biệt từng bước (Build image riêng, khởi động riêng)
+1. **Bước 1: Build Docker Images cho Backend và Frontend**:
+   ```bash
+   docker compose -f docker-compose.dev.yml build
+   ```
+2. **Bước 2: Khởi động toàn bộ các dịch vụ**:
+   ```bash
+   docker compose -f docker-compose.dev.yml up -d
+   ```
+
+#### Theo dõi trạng thái & Logs:
+- **Kiểm tra trạng thái các container**:
+  ```bash
+  docker compose -f docker-compose.dev.yml ps
+  ```
+- **Xem toàn bộ log thời gian thực**:
+  ```bash
+  docker compose -f docker-compose.dev.yml logs -f
+  ```
+- **Xem log riêng cho từng service**:
+  ```bash
+  docker compose -f docker-compose.dev.yml logs -f backend
+  docker compose -f docker-compose.dev.yml logs -f frontend
+  docker compose -f docker-compose.dev.yml logs -f postgres
+  ```
+
+#### Địa chỉ truy cập các dịch vụ:
+- **Frontend App**: [http://localhost:5173](http://localhost:5173) (Hỗ trợ Fast Refresh / Hot Module Replacement)
+- **Backend API**: [http://localhost:3000](http://localhost:3000) (NestJS Hot-reload)
+- **PostgreSQL Database**: `localhost:5432` (kết nối qua DBeaver, pgAdmin hoặc TablePlus với user: `postgres`, password: `postgres`, database: `booking_db`)
+
+### 5.4. Các lệnh quản trị thường dùng
+- **Dừng toàn bộ hệ thống**:
+  ```bash
+  docker compose -f docker-compose.dev.yml down
+  ```
+- **Dừng hệ thống và xóa toàn bộ dữ liệu database (Reset Database Volume)**:
+  ```bash
+  docker compose -f docker-compose.dev.yml down -v
+  ```
+- **Rebuild lại một service cụ thể (khi vừa cài thêm package/thư viện mới)**:
+  ```bash
+  # Rebuild Backend
+  docker compose -f docker-compose.dev.yml up -d --build backend
+
+  # Rebuild Frontend
+  docker compose -f docker-compose.dev.yml up -d --build frontend
+  ```
+- **Chạy lệnh kiểm tra code (Lint / Test) bên trong container**:
+  ```bash
+  # Chạy linter backend
+  docker compose -f docker-compose.dev.yml exec backend pnpm run lint
+
+  # Chạy test backend
+  docker compose -f docker-compose.dev.yml exec backend pnpm run test:cov
+
+  # Chạy linter frontend
+  docker compose -f docker-compose.dev.yml exec frontend npm run lint
+  ```
+
+### 5.5. Chế độ phát triển kết hợp (Hybrid Development - Khuyên dùng)
+Khi cần debug sâu từng dòng code bằng breakpoint IDE hoặc kiểm thử nhanh:
+1. **Khởi động riêng PostgreSQL 16-alpine bằng Docker Compose**:
+   ```bash
+   docker compose -f docker-compose.dev.yml up -d postgres
+   ```
+2. **Khởi động Backend trên máy host (Terminal 1)**:
+   ```bash
+   cd backend
+   pnpm install
+   pnpm run start:dev
+   ```
+3. **Khởi động Frontend trên máy host (Terminal 2)**:
+   ```bash
+   cd frontend
+   npm install
+   npm run dev
+   ```
+
