@@ -1,0 +1,168 @@
+Draft - Đặc tả yêu cầu
+
+phân quyền 3 role customer, admin, staff
+
+Use case
+	đăng nhập JWT - 3 role - Đăng nhập bằng email, password
+	đăng ký - customer - Đăng ký tên, email, password
+	quản lý tài khoản - admin - Xem, lọc, tìm kiếm/Thêm/sửa/xóa tài khoản, chọn role customer hoặc staff
+	xem, tìm kiếm, lọc dịch vụ - ko có - Xem lọc, tìm kiếm dịch vụ
+	thêm dịch vụ - staff
+	sửa dịch vụ - staff
+	xóa dịch vụ - staff
+	quản lý nhà cung cấp dịch vụ - staff
+	quản lý lịch, số chỗ trống - staff - Xem/Thêm/Sửa/Xóa lịch ngày, giờ, dịch vụ, số chỗ trống
+	đặt lịch - customer - Đăng ký dịch vụ theo ngày, giờ
+	xem lịch sử booking - customer, staff - Customer xem lịch sử booking của mình, Staff xem lịch sử tất cả booking, lấy ra 1 booking cụ thể theo id
+	Xác nhận/Từ chối - staff - Xử lý booking đang Chờ
+	Hủy booking - staff, customer - Customer hủy booking đã xác nhận hoặc đang chờ, tính phí hủy kể từ thời điểm đc xác nhận cho Customer, Staff hủy booking đã xác nhận, ko tính phí hủy cho Customer, ghi nhận người hủy là Staff hay Customer
+	báo cáo tổng quan booking - staff - xem số lượng booking theo trạng thái, theo tháng
+	
+Đặc tả ca sử dụng
+	Quản lý tài khoản - Tiền đk: Admin
+		-> Xem, lọc, tìm kiếm -> Lọc theo điều kiện và keyword tìm kiếm theo tên, email -> 200 Lấy danh sách tài khoản phân trang, ko kèm password
+		-> Lấy theo id -> kiểm tra tồn tại
+			-> 200 tài khoản
+			-> 404 ko tìm thấy
+		-> Thêm -> Thêm tài khoản gồm tên, email, password, role -> Kiểm tra thông tin có hợp lệ, email đã tồn tại chưa, role là Customer hoặc Staff
+			-> Tạo tk -> 201 thông tin tài khoản, ko kèm password vừa tạo
+			-> 400 thông tin ko hợp lệ
+		-> Sửa -> Thông tin cập nhật -> Kiểm tra tồn tại
+			-> 400 ko hợp lệ
+			-> 404 ko thấy
+			-> Kiểm tra thông tin có hợp lệ, email đã tồn tại, bỏ qua email cũ, role là Customer hoặc Staff
+				-> Cập nhật -> 200 thông tin cập nhật
+				-> 400 thông tin ko hợp lệ, hoặc thiếu thông tin
+		-> Reset password -> Kiểm tra tồn tại
+			-> 400 ko hợp lệ
+			-> 404 ko thấy 
+			-> kiểm tra password có hợp lệ
+				-> Đổi pass -> 204 no body
+				-> 400 ko hợp lệ	
+		-> Xóa -> kiểm tra tồn tại, có phải admin
+			-> 400 ko hợp lệ
+			-> 404 ko tìm thấy			
+			-> Cảnh báo còn booking liên kết -> Xóa booking -> Xóa tk -> 204 no body
+			
+	Đăng nhập JWT - Tiền đk: Ko có
+		-> Đăng nhập email, pass -> Kiểm tra tồn tại, trùng khớp
+			-> 400 ko hợp lệ
+			-> Tạo tokens -> 200 tokens
+	
+	Đăng ký - Tiền đk: ko có
+		-> Đăng ký tên, email, pass -> Kiểm tra thông tin có hợp lệ, email có trùng
+			-> 400 thông tin ko hợp lệ, email trùng
+			-> Tạo tk -> 201 thông tin tài khoản ko kèm pass
+	
+	Đặt lịch - Tiền đk: Customer 
+		-> Thông tin đăng ký gồm: lịch, dịch vụ, số lượng -> Kiểm tra dịch vụ có tồn tại, lịch, số lượng có hợp lệ, có còn chỗ trống
+			-> 400 ttin ko hợp lệ, hết số lượng
+			-> Tạo booking trạng thái pending -> 201 ttin booking, chi phí
+	
+	Xem, tìm kiếm, lọc dịch vụ - Tiền đk: Ko có
+		-> Xem, lọc, tìm kiếm -> Lọc theo điều kiện và keyword tìm kiếm theo tên -> 200 Lấy danh sách dịch vụ phân trang, kèm nhà cung cấp
+		-> Lấy theo id -> kiểm tra tồn tại
+			-> 200 dịch vụ kèm nhà cung cấp và lịch, chỗ trống
+			-> 404 ko tìm thấy
+
+	Xem lịch sử booking - Tiền đk: Customer, staff
+		-> Kiểm tra role
+			-> Customer 
+				-> Lấy danh sách -> 200 Lấy ra danh sách phân trang các booking của user
+				-> Lấy theo id -> kiểm tra quyền sở hữu
+					-> 403 ko thuộc sở hữu
+					-> 200 ttin booking kèm ttin dịch vụ
+			-> Staff 
+				-> Lấy danh sách -> 200 Lấy danh sách phân trang của mọi booking
+				-> Lấy theo id -> 200 ttin booking kèm ttin dịch vụ
+
+	Thêm dịch vụ - Tiền đk: Staff
+		-> Gửi ttin dịch vụ -> Kiểm tra thông tin có hợp lệ, nhà cung cấp có hợp lệ
+			-> 404 ko tìm thấy nhà cung cấp
+			-> 400 ttin ko hợp lệ
+			-> Tạo dịch vụ -> 201 ttin dịch vụ mới
+
+	Sửa dịch vụ - Tiền đk: Staff
+		-> Gửi ttin dịch vụ -> Kiểm tra dịch vụ có tồn tại, thông tin có hợp lệ, nhà cung cấp có hợp lệ
+			-> 404 ko tìm thấy nhà cung cấp hoặc dịch vụ
+			-> 400 ttin ko hợp lệ
+			-> Cập nhật dịch vụ -> 200 ttin cập nhật
+	
+	Xóa dịch vụ - Tiền đk: Staff
+		-> Gửi ttin dịch vụ -> Kiểm tra dịch vụ có tồn tại
+			-> 404 ko tìm thấy dịch vụ
+			-> Cảnh báo còn booking, lịch liên kết -> Xóa tất cả booking của dịch vụ, xóa tất cả lịch của dịch vụ -> Xóa dịch vụ -> 204
+
+	Quản lý nhà cung cấp - Tiền đk: Staff
+		-> Xem, lọc, tìm kiếm -> Lọc theo điều kiện và keyword tìm kiếm theo tên, email, sđt -> 200 Lấy danh sách nhà cung cấp phân trang
+		-> Lấy theo id -> kiểm tra tồn tại
+			-> 200 ttin nhà cung cấp kèm danh sách dịch vụ
+			-> 404 ko tìm thấy
+		-> Thêm -> Gửi ttin gồm tên, email, sđt, địa chỉ -> Kiểm tra thông tin có hợp lệ, tên hoặc email đã tồn tại chưa
+			-> Tạo nhà cung cấp -> 201 ttin nhà cung cấp vừa tạo
+			-> 400 ttin ko hợp lệ
+		-> Sửa -> Gửi ttin cập nhật -> Kiểm tra tồn tại
+			-> 404 ko thấy
+			-> Kiểm tra thông tin có hợp lệ, trùng lặp, bỏ qua thông tin cũ
+				-> Cập nhật -> 200 ttin cập nhật
+				-> 400 ttin ko hợp lệ, hoặc thiếu thông tin
+		-> Xóa -> Kiểm tra tồn tại
+			-> 404 ko tìm thấy
+			-> Kiểm tra có dịch vụ đang liên kết không
+				-> 400 ko thể xóa do còn dịch vụ đang liên kết
+				-> Cảnh báo còn dịch vụ liên kết -> Xóa dịch vụ -> Xóa nhà cung cấp -> 204 no body
+	
+	Quản lý lịch, số chỗ trống - Tiền đk: Staff
+		-> Xem, lọc, tìm kiếm -> Lọc theo dịch vụ, ngày, trạng thái còn chỗ -> 200 Lấy danh sách lịch phân trang
+		-> Lấy theo id -> kiểm tra tồn tại
+			-> 200 ttin lịch gồm dịch vụ, ngày, giờ bắt đầu/kết thúc, tổng số chỗ, số chỗ đã đặt, số chỗ còn trống
+			-> 404 ko tìm thấy
+		-> Thêm -> Gửi ttin gồm dịch vụ, ngày, giờ bắt đầu/kết thúc, số chỗ tối đa -> Kiểm tra dịch vụ có tồn tại, thời gian và số chỗ có hợp lệ, không trùng lịch
+			-> 404 ko tìm thấy dịch vụ
+			-> 400 ttin ko hợp lệ, trùng lịch
+			-> Tạo lịch -> 201 ttin lịch mới tạo
+		-> Sửa -> Gửi ttin cập nhật gồm ngày, giờ, số chỗ tối đa -> Kiểm tra tồn tại
+			-> 404 ko thấy
+			-> Kiểm tra ttin hợp lệ, số chỗ mới không nhỏ hơn số chỗ đã được đặt, không trùng lịch
+				-> Cập nhật lịch -> 200 ttin cập nhật
+				-> 400 ttin ko hợp lệ, số chỗ nhỏ hơn số chỗ đã đặt
+		-> Xóa -> Kiểm tra tồn tại
+			-> 404 ko tìm thấy
+			-> Kiểm tra có booking đang hoạt động (pending, confirmed) không
+				-> 400 ko thể xóa lịch đã có booking đang hoạt động
+				-> Cảnh báo còn booking liên kết -> Xóa booking -> Xóa lịch -> 204 no body
+
+	Xác nhận/Từ chối booking - Tiền đk: Staff
+		-> Xác nhận -> Gửi bookingId -> Kiểm tra booking có tồn tại
+			-> 404 ko tìm thấy booking
+			-> Kiểm tra trạng thái booking có phải pending
+				-> 400 trạng thái ko hợp lệ
+				-> Kiểm tra số chỗ trống của lịch còn đủ không
+					-> 400 hết số lượng chỗ trống
+					-> Cập nhật trạng thái confirmed -> 200 ttin booking đã xác nhận
+		-> Từ chối -> Gửi bookingId, lý do từ chối -> Kiểm tra booking có tồn tại
+			-> 404 ko tìm thấy booking
+			-> Kiểm tra trạng thái booking có phải pending
+				-> 400 trạng thái ko hợp lệ
+				-> Cập nhật trạng thái rejected kèm lý do -> 200 ttin booking đã từ chối
+
+	Hủy booking - Tiền đk: Customer, Staff
+		-> Kiểm tra role
+			-> Customer 
+				-> Gửi yêu cầu hủy kèm bookingId, lý do -> Kiểm tra booking có tồn tại
+					-> 404 ko tìm thấy booking
+					-> Kiểm tra quyền sở hữu
+						-> 403 ko thuộc sở hữu
+						-> Kiểm tra trạng thái booking có phải pending hoặc confirmed
+							-> 400 trạng thái ko hợp lệ để hủy
+							-> Tính phí hủy kể từ thời điểm booking được xác nhận, hoàn lại số chỗ trống, ghi nhận người hủy là customer -> Cập nhật trạng thái cancelled -> 200 ttin booking đã hủy, phí hủy
+			-> Staff 
+				-> Gửi yêu cầu hủy kèm bookingId, lý do -> Kiểm tra booking có tồn tại
+					-> 404 ko tìm thấy booking
+					-> Kiểm tra trạng thái booking có phải pending hoặc confirmed
+						-> 400 trạng thái ko hợp lệ để hủy
+						-> hoàn lại số chỗ trống, ghi nhận người hủy là staff -> Cập nhật trạng thái cancelled -> 200 ttin booking đã hủy, ko tính phí hủy cho Customer
+
+	Báo cáo tổng quan booking - Tiền đk: Staff
+		-> Báo cáo theo trạng thái -> Gửi điều kiện lọc theo thời gian, dịch vụ -> Thống kê số lượng booking theo từng trạng thái (pending, confirmed, cancelled, rejected) -> 200 dữ liệu thống kê số lượng và tỷ lệ theo trạng thái
+		-> Báo cáo theo tháng -> Gửi khoảng thời gian theo năm, các tháng cần xem -> Thống kê số lượng booking và doanh thu theo từng tháng -> 200 dữ liệu thống kê số lượng booking theo tháng
