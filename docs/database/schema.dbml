@@ -1,0 +1,210 @@
+// ==============================================================================
+// BOOKING APP - DATABASE SCHEMA SPECIFICATION (DBML)
+// Version: 1
+// Website: https://dbdiagram.io
+// Hệ quản trị CSDL: PostgreSQL 16
+// Đặc tả nghiệp vụ: docs/requiments_specification/Requirements_Specification.md
+// ==============================================================================
+
+Project booking_app {
+  database_type: 'PostgreSQL'
+  Note: '''
+    # Booking App Database Design (Version 1)
+    Hệ thống đặt lịch trực tuyến với phân quyền 3 cấp (Admin, Staff, Customer),
+    quản lý nhà cung cấp, dịch vụ, lịch khung giờ & số chỗ trống, cùng cơ chế
+    giữ chỗ, duyệt và hủy booking theo chính sách phí.
+  '''
+}
+
+// ==============================================================================
+// 1. ENUMS (ĐỊNH NGHĨA CÁC KIỂU LIỆT KÊ)
+// ==============================================================================
+
+Enum user_role {
+  ADMIN [note: 'Quản trị viên duy nhất, toàn quyền quản trị tài khoản (BR-01)']
+  STAFF [note: 'Nhân viên quản lý nhà cung cấp, dịch vụ, lịch và xử lý booking']
+  CUSTOMER [note: 'Khách hàng đặt lịch, xem lịch sử và quản lý booking cá nhân']
+}
+
+Enum booking_status {
+  PENDING [note: 'Chờ xử lý: Đã tạm giữ chỗ trong lịch (BR-02)']
+  CONFIRMED [note: 'Đã xác nhận: Nhân viên đã duyệt, chỗ được giữ chính thức (BR-02)']
+  CANCELLED [note: 'Đã hủy: Khách hàng hoặc nhân viên hủy, hoàn lại số chỗ trống (BR-02, BR-03)']
+  REJECTED [note: 'Đã từ chối: Nhân viên từ chối kèm lý do, hoàn lại số chỗ trống (BR-02, UC-10)']
+}
+
+Enum cancelled_by_role {
+  CUSTOMER [note: 'Khách hàng tự hủy: Nếu CONFIRMED thì tính phí 10% (BR-03)']
+  STAFF [note: 'Nhân viên hủy vì lý do vận hành: Miễn phí hủy cho khách hàng (BR-03)']
+}
+
+// ==============================================================================
+// 2. TABLES (DANH SÁCH BẢNG DỮ LIỆU)
+// ==============================================================================
+
+// ------------------------------------------------------------------------------
+// Bảng 1: users (Tài khoản người dùng & phân quyền)
+// Tham chiếu: BR-01, UC-01, UC-02, UC-03
+// ------------------------------------------------------------------------------
+Table users {
+  id integer [increment, note: 'Khóa chính số nguyên tự tăng (SERIAL)']
+  full_name varchar(100) [not null, note: 'Họ và tên người dùng (UC-01)']
+  email varchar(255) [unique, not null, note: 'Địa chỉ email dùng để đăng nhập (duy nhất)']
+  password_hash varchar(255) [not null, note: 'Mật khẩu đã được băm an toàn (bcrypt/argon2)']
+  role user_role [not null, default: 'CUSTOMER', note: 'Vai trò người dùng (ADMIN duy nhất, STAFF, CUSTOMER)']
+  created_at timestamptz [not null, default: `now()`, note: 'Thời điểm tạo tài khoản']
+  updated_at timestamptz [not null, default: `now()`, note: 'Thời điểm cập nhật tài khoản gần nhất']
+
+  indexes {
+    id [pk]
+    email [unique]
+    role
+  }
+
+  Note: 'Bảng quản lý tài khoản người dùng, phân quyền truy cập hệ thống'
+}
+
+// ------------------------------------------------------------------------------
+// Bảng 2: providers (Nhà cung cấp dịch vụ)
+// Tham chiếu: UC-05, BR-04
+// ------------------------------------------------------------------------------
+Table providers {
+  id integer [increment, note: 'Khóa chính số nguyên tự tăng (SERIAL)']
+  name varchar(150) [unique, not null, note: 'Tên nhà cung cấp (duy nhất, không trùng lặp)']
+  description text [note: 'Mô tả thông tin giới thiệu về nhà cung cấp']
+  created_at timestamptz [not null, default: `now()`, note: 'Thời điểm tạo bản ghi']
+  updated_at timestamptz [not null, default: `now()`, note: 'Thời điểm cập nhật gần nhất']
+
+  indexes {
+    id [pk]
+    name [unique]
+  }
+
+  Note: 'Bảng lưu trữ thông tin các đối tác / nhà cung cấp dịch vụ (Staff quản lý)'
+}
+
+// ------------------------------------------------------------------------------
+// Bảng 3: services (Dịch vụ)
+// Tham chiếu: UC-04, UC-06, BR-04
+// ------------------------------------------------------------------------------
+Table services {
+  id integer [increment, note: 'Khóa chính số nguyên tự tăng (SERIAL)']
+  provider_id integer [not null, note: 'Khóa ngoại liên kết tới nhà cung cấp sở hữu (providers.id)']
+  name varchar(150) [not null, note: 'Tên dịch vụ']
+  description text [note: 'Mô tả chi tiết nội dung dịch vụ']
+  price numeric(12, 2) [not null, default: 0, note: 'Đơn giá niêm yết của dịch vụ (VNĐ, >= 0)']
+  created_at timestamptz [not null, default: `now()`, note: 'Thời điểm tạo bản ghi']
+  updated_at timestamptz [not null, default: `now()`, note: 'Thời điểm cập nhật gần nhất']
+
+  indexes {
+    id [pk]
+    provider_id
+    name
+  }
+
+  Note: 'Bảng danh mục các dịch vụ do nhà cung cấp phát hành'
+}
+
+// ------------------------------------------------------------------------------
+// Bảng 4: schedules (Lịch & Số chỗ trống theo khung giờ)
+// Tham chiếu: BR-02, BR-05, UC-07
+// ------------------------------------------------------------------------------
+Table schedules {
+  id integer [increment, note: 'Khóa chính số nguyên tự tăng (SERIAL)']
+  service_id integer [not null, note: 'Khóa ngoại liên kết tới dịch vụ tương ứng (services.id)']
+  date date [not null, note: 'Ngày diễn ra lịch hẹn']
+  start_time time [not null, note: 'Thời gian bắt đầu khung giờ']
+  duration integer [not null, note: 'Khoảng thời gian diễn ra (giờ)']
+  total_slots integer [not null, note: 'Tổng số chỗ tối đa được phục vụ trong khung giờ (> 0)']
+  created_at timestamptz [not null, default: `now()`, note: 'Thời điểm tạo bản ghi']
+  updated_at timestamptz [not null, default: `now()`, note: 'Thời điểm cập nhật gần nhất']
+
+  indexes {
+    id [pk]
+    service_id
+    date
+    (service_id, date)
+  }
+
+  Note: 'Lịch cung cấp dịch vụ theo ngày và khung giờ, quản lý tải và sức chứa (BR-02, BR-05)'
+}
+
+// ------------------------------------------------------------------------------
+// Bảng 5: bookings (Đặt lịch hẹn & quản lý trạng thái, chi phí)
+// Tham chiếu: BR-02, BR-03, BR-04, UC-08, UC-09, UC-10, UC-11, UC-12
+// ------------------------------------------------------------------------------
+Table bookings {
+  id integer [increment, note: 'Khóa chính số nguyên tự tăng (SERIAL)']
+  customer_id integer [not null, note: 'Khóa ngoại tham chiếu khách hàng đặt chỗ (users.id)']
+  schedule_id integer [not null, note: 'Khóa ngoại tham chiếu khung giờ lịch hẹn (schedules.id)']
+  quantity integer [not null, default: 1, note: 'Số lượng chỗ cần đặt (>= 1, <= chỗ trống hiện có)']
+  unit_price_snapshot numeric(12, 2) [not null, note: 'Đơn giá dịch vụ snapshot tại thời điểm đặt lịch']
+  status booking_status [not null, default: 'PENDING', note: 'Trạng thái booking: PENDING, CONFIRMED, CANCELLED, REJECTED']
+  side_note text [note: 'Ghi chú cho booking, viết bởi Staff']
+  cancelled_by_id integer [note: 'Khóa ngoại tham chiếu người thực hiện thao tác hủy (users.id)']
+  cancelled_by_role cancelled_by_role [note: 'Vai trò người hủy (CUSTOMER / STAFF) làm căn cứ tính phí hủy (BR-03)']
+  confirmed_at timestamptz [note: 'Thời điểm nhân viên bấm xác nhận booking (mốc tính phí nếu sau đó hủy)']
+  cancelled_at timestamptz [note: 'Thời điểm booking bị hủy']
+  rejected_at timestamptz [note: 'Thời điểm nhân viên từ chối booking']
+  created_at timestamptz [not null, default: `now()`, note: 'Thời điểm tạo yêu cầu đặt lịch (PENDING)']
+  updated_at timestamptz [not null, default: `now()`, note: 'Thời điểm cập nhật bản ghi gần nhất']
+
+  indexes {
+    id [pk]
+    customer_id
+    schedule_id
+    status
+    created_at
+    (status, created_at)
+  }
+
+  Note: 'Bảng lưu trữ thông tin giao dịch đặt chỗ, tình trạng duyệt, tính phí hủy và lịch sử xử lý'
+}
+
+// ==============================================================================
+// 3. RELATIONSHIPS (QUAN HỆ GIỮA CÁC BẢNG & RÀNG BUỘC TOÀN VẸN)
+// Tham chiếu Cascade Deletion: BR-04
+// ==============================================================================
+
+// 1. Provider -> Services:
+// Một nhà cung cấp có nhiều dịch vụ.
+// Khi xóa nhà cung cấp: Cảnh báo và xóa toàn bộ dịch vụ liên quan (BR-04)
+Ref fk_services_provider: services.provider_id > providers.id [delete: cascade, update: cascade]
+
+// 2. Service -> Schedules:
+// Một dịch vụ có nhiều khung giờ lịch theo ngày.
+// Khi xóa dịch vụ: Cảnh báo và xóa toàn bộ lịch liên quan (BR-04)
+Ref fk_schedules_service: schedules.service_id > services.id [delete: cascade, update: cascade]
+
+// 3. User (Customer) -> Bookings:
+// Một khách hàng có nhiều booking.
+// Khi xóa tài khoản: Cảnh báo và xóa toàn bộ các booking của tài khoản đó (BR-04)
+Ref fk_bookings_customer: bookings.customer_id > users.id [delete: cascade, update: cascade]
+
+// 4. Schedule -> Bookings:
+// Một khung giờ lịch có nhiều booking từ các khách hàng.
+// Khi xóa lịch: Cảnh báo và xóa toàn bộ các booking liên quan (BR-04)
+Ref fk_bookings_schedule: bookings.schedule_id > schedules.id [delete: cascade, update: cascade]
+
+// 5. User (Staff / Customer) -> Bookings (Người hủy):
+// Ghi nhận tài khoản đã thực hiện thao tác hủy.
+// Nếu tài khoản đó bị xóa trong demo, set null để bảo toàn lịch sử giao dịch.
+Ref fk_bookings_cancelled_by: bookings.cancelled_by_id > users.id [delete: set null, update: cascade]
+
+// ==============================================================================
+// 4. TABLE GROUPS (PHÂN NHÓM CHỨC NĂNG TRÊN DBDATADIAGRAM.IO)
+// ==============================================================================
+
+TableGroup identity_access_management {
+  users
+}
+
+TableGroup service_catalog_and_schedules {
+  providers
+  services
+  schedules
+}
+
+TableGroup booking_and_reservations {
+  bookings
+}
