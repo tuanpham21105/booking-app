@@ -115,7 +115,7 @@ Thiết lập toàn bộ khung kiến trúc Clean Architecture dùng chung (`src
 - [x] Khung thư mục Clean Architecture chuẩn hóa.
 - [x] `DatabaseModule` kết nối thành công tới PostgreSQL 16-alpine.
 - [x] Global Exception Filter & Validation Pipe hoạt động ổn định.
-- [ ] Swagger UI sẵn sàng tại `/api/docs`.
+- [x] Swagger UI sẵn sàng tại `/api/docs`.
 - [x] Endpoint `GET /api/v1/health` trả về trạng thái máy chủ `200 OK`.
 
 #### 5. Chiến lược kiểm thử độc lập (Independent Testing)
