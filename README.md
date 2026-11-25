@@ -43,7 +43,7 @@ Dự án được chia tách thành hai phân hệ độc lập (Backend và Fro
 
 ### 2.3. DevOps & Quy trình phát triển
 - **Containerization**: Docker & Docker Compose (cho PostgreSQL 16 và toàn bộ môi trường ứng dụng)
-- **AI Agent Integration**: Hệ thống tài liệu chỉ dẫn và ranh giới an toàn cho AI Coding Assistant ([AGENTS.md](file:///home/tuan-pham/Documents/Work_Projects/TrinityTech/booking-app/AGENTS.md), [.agent/context/](file:///home/tuan-pham/Documents/Work_Projects/TrinityTech/booking-app/.agent/context))
+- **AI Agent Integration**: Hệ thống tài liệu chỉ dẫn và ranh giới an toàn cho AI Coding Assistant ([AGENTS.md](AGENTS.md), [.agents/context/](.agents/context/))
 
 ---
 
@@ -51,9 +51,10 @@ Dự án được chia tách thành hai phân hệ độc lập (Backend và Fro
 
 ```
 booking-app/
-├── .agent/                  # Ngữ cảnh và quy định làm việc cho AI Agent
-│   └── context/
-│       └── 01-workflow-and-ai-rules.md  # Quy trình Git & mẫu khai báo AI
+├── .agents/                 # Ngữ cảnh và quy định làm việc cho AI Agent
+│   ├── context/
+│   │   └── 01-workflow-and-ai-rules.md  # Quy trình Git & mẫu khai báo AI
+│   └── skills/              # Kỹ năng bổ trợ cho AI Agent
 │
 ├── backend/                 # Phân hệ Backend (NestJS 12)
 │   ├── src/
@@ -97,7 +98,7 @@ booking-app/
 
 ## 5. Hướng dẫn khởi chạy môi trường Dev Local (Local Development Guide)
 
-Dự án cung cấp cấu hình [docker-compose.dev.yml](file:///home/tuan-pham/Documents/Work_Projects/TrinityTech/booking-app/docker-compose.dev.yml) để khởi chạy toàn diện môi trường phát triển bao gồm: **PostgreSQL 16-alpine**, **Backend (NestJS 12)** và **Frontend (React 19 + Vite 8)**.
+Dự án cung cấp cấu hình [docker-compose.dev.yml](docker-compose.dev.yml) để khởi chạy toàn diện môi trường phát triển bao gồm: **PostgreSQL 16-alpine**, **Backend (NestJS 12)** và **Frontend (React 19 + Vite 8)**.
 
 ### 5.1. Yêu cầu hệ thống (Prerequisites)
 - [Docker Engine](https://docs.docker.com/engine/install/) phiên bản $\ge 20.10$ hoặc [Docker Desktop](https://www.docker.com/products/docker-desktop/).
@@ -105,7 +106,7 @@ Dự án cung cấp cấu hình [docker-compose.dev.yml](file:///home/tuan-pham/
 - *(Tùy chọn cho Hybrid Dev)*: Node.js 20+, `pnpm` (backend), `npm` (frontend).
 
 ### 5.2. Chuẩn bị biến môi trường (Environment Configuration)
-Trước khi khởi chạy, tạo file cấu hình môi trường từ file mẫu [.env.dev.example](file:///home/tuan-pham/Documents/Work_Projects/TrinityTech/booking-app/.env.dev.example):
+Trước khi khởi chạy, tạo file cấu hình môi trường từ file mẫu [.env.dev.example](.env.dev.example):
 
 ```bash
 cp .env.dev.example .env

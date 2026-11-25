@@ -18,14 +18,30 @@ Dưới đây là các **lệnh cấm tuyệt đối** và nguyên tắc an toà
 - **CẤM TỰ SUY DIỄN**: Không được phép tự ý phỏng đoán hoặc tự quyết định các quy tắc nghiệp vụ khi chưa có yêu cầu rõ ràng.
 - **BẮT BUỘC HỎI LẠI**: Mỗi khi phát hiện điểm thiếu rõ ràng, logic mâu thuẫn hoặc cần đưa ra quyết định về nghiệp vụ, Agent **bắt buộc phải dừng lại và hỏi người dùng** để được làm rõ trước khi viết code.
 
-### 1.3. Kiểm soát phiên bản (Git & Remote VCS)
+### 1.3. Kiểm soát phiên bản & Khai báo Pull Request (Git & PR Rules)
 - **CẤM TUYỆT ĐỐI**: Không tự ý chạy các lệnh `git commit`, `git push`, `git merge`, `git rebase`, `git tag` hoặc bất kỳ hành động nào gửi code lên remote repository.
 - **QUY TRÌNH CHUẨN**: Mọi hành động commit và push sẽ do Developer review lại thay đổi và tự thực hiện thủ công.
-- **TRÁCH NHIỆM CỦA AGENT**: Sau khi hoàn thành code và tự kiểm tra (build/lint/test pass), Agent soạn sẵn:
-  1. Gợi ý thông điệp commit chuẩn (Conventional Commits: `feat: ...`, `fix: ...`).
-  2. Báo cáo khai báo AI cho Pull Request (theo mẫu tại [.agent/context/03-workflow-and-ai-rules.md](file:///home/tuan-pham/Documents/Work_Projects/TrinityTech/booking-app/.agent/context/03-workflow-and-ai-rules.md)).
+- **RÀNG BUỘC KHI TẠO MẪU KHAI BÁO PULL REQUEST (PR Guardrail)**:
+  1. **Kiểm tra nhánh (Branch Guardrail)**: Khi Developer yêu cầu tạo mẫu khai báo PR, Agent **bắt buộc phải kiểm tra tên branch hiện tại**:
+     - Nếu branch hiện tại là `main`, `develop` hoặc một branch không phải nhánh task: **Agent TUYỆT ĐỐI KHÔNG ĐƯỢC LÀM GÌ CẢ (không tạo mẫu khai báo PR)** mà phải dừng lại và **báo ngay cho Developer** rằng đang đứng ở nhánh chính (`main`/`develop`), không phải nhánh task nên không tạo Pull Request.
+     - Nếu branch là nhánh task hợp lệ (ví dụ: `docs/BE-7-...`, `feat/...`, `fix/...`): Phân tích toàn bộ nội dung thay đổi trên branch hiện tại so với branch gốc (`develop`/`main`) để tạo báo cáo.
+  2. **Cấu trúc mẫu khai báo PR bắt buộc**:
+     - **Tiêu đề Pull Request (PR Title)**: Đặt theo chuẩn Conventional Commits khớp mã task (ví dụ: `docs(BE-7): plan overview backend development roadmap`).
+     - **Tổng quan thay đổi (Summary of Changes)**: Dựa trên toàn bộ diff thực tế trên branch hiện tại.
+     - **Khai báo mức độ sử dụng AI**: Phân định rõ thành phần do AI sinh (AI-Generated).
+     - **Phương thức kiểm chứng (Verification Steps)**: Checklist linter, build, test coverage, tuân thủ an toàn dữ liệu. phần do con người làm, kiểm chứng.
+  3. **Tự động kích hoạt**: Khi Developer yêu cầu "mẫu khai báo pull request", Agent phải tự động phân tích và viết ra đầy đủ theo đúng mẫu ràng buộc trên.
+  4. Chi tiết xem tại: [.agents/context/01-workflow-and-ai-rules.md](.agents/context/01-workflow-and-ai-rules.md).
 
-### 1.4. Các ràng buộc an toàn gợi ý thêm (Recommended Best-Practice Guardrails)
+### 1.4. Quy định về đường dẫn (Relative Path Constraint)
+- **BẮT BUỘC ĐƯỜNG DẪN TƯƠNG ĐỐI**: Mọi đường dẫn (paths) được nhắc đến hoặc sử dụng trong tài liệu, mã nguồn, liên kết Markdown (`[label](path)`), task log hoặc trao đổi với người dùng **bắt buộc phải luôn là đường dẫn tương đối tính từ thư mục gốc của dự án** (project root directory).
+- **CẤM TUYỆT ĐỐI**: Không sử dụng đường dẫn tuyệt đối (absolute path, ví dụ: `/home/...`, `C:\...`, `file:///home/...`).
+
+### 1.5. Quản lý tài liệu nhiệm vụ (Task Files Immutability)
+- **CẤM TUYỆT ĐỐI**: Không bao giờ được chỉnh sửa, cập nhật, thay đổi hoặc xóa nội dung các file nhiệm vụ (`docs/tasks/*.md`, `tasks/*.md` hoặc bất kỳ file task nào trong dự án).
+- **CHỈ ĐƯỢC PHÉP ĐỌC**: Các file task là đặc tả yêu cầu gốc do Developer / Product Owner giao phó; Agent chỉ được đọc (read-only) để nắm bắt yêu cầu triển khai, tuyệt đối không tự ý cập nhật kết quả, trạng thái hoặc ghi chú vào các file này.
+
+### 1.6. Các ràng buộc an toàn gợi ý thêm (Recommended Best-Practice Guardrails)
 - **Không phá vỡ Type-Safety**: Tuyệt đối không sử dụng `@ts-ignore`, `eslint-disable`, hoặc ép kiểu `any` tùy tiện chỉ để "lách" lỗi biên dịch hoặc linter.
 - **Không tự ý cài đặt thư viện**: Trước khi chạy `pnpm add` hoặc `npm install` thêm package mới, phải giải thích lý do và hỏi ý kiến Developer.
 - **Không xóa file hàng loạt**: Không chạy các lệnh xóa file hủy diệt (`rm -rf`, xóa database schema/tables) khi chưa có sự xác nhận của Developer.
@@ -42,13 +58,13 @@ Dưới đây là các **lệnh cấm tuyệt đối** và nguyên tắc an toà
   - Kiến trúc: **Clean Architecture bổ dọc theo từng Module (Vertical Slice Clean Architecture)**.
     - Mỗi module bao gồm: `presentation`, `application`, `domain`, `infrastructure`.
     - Tài nguyên dùng chung đặt tại `src/common/` cũng tổ chức theo Clean Architecture.
-  - Chi tiết xem tại: [backend/AGENTS.md](file:///home/tuan-pham/Documents/Work_Projects/TrinityTech/booking-app/backend/AGENTS.md).
+  - Chi tiết xem tại: [backend/AGENTS.md](backend/AGENTS.md).
 - **Frontend**:
   - React 19 + TypeScript + Vite 8.
   - Đang trong quá trình chốt phương án kiến trúc (Feature-Based vs Clean Architecture).
-  - Chi tiết xem tại: [frontend/AGENTS.md](file:///home/tuan-pham/Documents/Work_Projects/TrinityTech/booking-app/frontend/AGENTS.md).
+  - Chi tiết xem tại: [frontend/AGENTS.md](frontend/AGENTS.md).
 - **Tài liệu quy trình & AI**:
-  - [.agent/context/03-workflow-and-ai-rules.md](file:///home/tuan-pham/Documents/Work_Projects/TrinityTech/booking-app/.agent/context/03-workflow-and-ai-rules.md).
+  - [.agents/context/01-workflow-and-ai-rules.md](.agents/context/01-workflow-and-ai-rules.md).
 
 ---
 
