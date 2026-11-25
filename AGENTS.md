@@ -58,13 +58,15 @@ Dưới đây là các **lệnh cấm tuyệt đối** và nguyên tắc an toà
   - Kiến trúc: **Clean Architecture bổ dọc theo từng Module (Vertical Slice Clean Architecture)**.
     - Mỗi module bao gồm: `presentation`, `application`, `domain`, `infrastructure`.
     - Tài nguyên dùng chung đặt tại `src/common/` cũng tổ chức theo Clean Architecture.
+  - Trạng thái phát triển: Đã hoàn thành **Giai đoạn 0: Khung Hạ tầng Dùng chung & Health Check**; lộ trình tiếp theo bám sát [docs/plans/backend_development_plan.md](docs/plans/backend_development_plan.md).
   - Chi tiết xem tại: [backend/AGENTS.md](backend/AGENTS.md).
 - **Frontend**:
   - React 19 + TypeScript + Vite 8.
-  - Đang trong quá trình chốt phương án kiến trúc (Feature-Based vs Clean Architecture).
+  - Kiến trúc: **Feature-Based Architecture (Chuẩn Bulletproof React)**.
   - Chi tiết xem tại: [frontend/AGENTS.md](frontend/AGENTS.md).
 - **Tài liệu quy trình & AI**:
-  - [.agents/context/01-workflow-and-ai-rules.md](.agents/context/01-workflow-and-ai-rules.md).
+  - [.agents/context/01-workflow-and-ai-rules.md](.agents/context/01-workflow-and-ai-rules.md): Quy trình Git, Guardrails và mẫu khai báo AI Attribution.
+  - [.agents/context/02-backend-architecture-and-standards.md](.agents/context/02-backend-architecture-and-standards.md): Tiêu chuẩn kiến trúc Clean Architecture, quy chuẩn API, Database và Testing cho Backend.
 
 ---
 

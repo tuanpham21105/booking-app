@@ -9,3 +9,7 @@
 # OS & Logs
 .DS_Store
 *.log
+
+# PNPM
+.pnpm-store
+node_modules

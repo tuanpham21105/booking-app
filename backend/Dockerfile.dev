@@ -6,7 +6,7 @@ WORKDIR /app
 RUN npm install -g pnpm@latest
 
 # Sao chép manifest dependencies để tận dụng Docker cache
-COPY package.json pnpm-lock.yaml ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 
 # Cài đặt dependencies (bao gồm devDependencies cho chế độ watch/hot-reload)
 RUN pnpm install

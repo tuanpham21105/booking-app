@@ -1,8 +1,22 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
+import { Global, INestApplication, Module } from '@nestjs/common';
 import request from 'supertest';
 import { App } from 'supertest/types';
+import { DataSource } from 'typeorm';
 import { AppModule } from './../src/app.module';
+import { CommonModule } from '../src/common/common.module';
+
+@Global()
+@Module({
+  providers: [
+    {
+      provide: DataSource,
+      useValue: { isInitialized: true, query: async () => [{ '?column?': 1 }] },
+    },
+  ],
+  exports: [DataSource],
+})
+class MockCommonModule {}
 
 describe('AppController (e2e)', () => {
   let app: INestApplication<App>;
@@ -10,7 +24,10 @@ describe('AppController (e2e)', () => {
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile();
+    })
+      .overrideModule(CommonModule)
+      .useModule(MockCommonModule)
+      .compile();
 
     app = moduleFixture.createNestApplication();
     await app.init();
@@ -24,6 +41,8 @@ describe('AppController (e2e)', () => {
   });
 
   afterEach(async () => {
-    await app.close();
+    if (app) {
+      await app.close();
+    }
   });
 });

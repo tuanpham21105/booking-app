@@ -24,17 +24,25 @@ Hệ thống backend được tổ chức theo module chức năng (Vertical Sli
 
 ```
 backend/src/
-├── main.ts                              # Điểm khởi chạy ứng dụng (Bootstrap, Swagger, ValidationPipe)
+├── main.ts                              # Điểm khởi chạy ứng dụng (Bootstrap, Global Prefix /api/v1, Swagger, ValidationPipe, HttpExceptionFilter)
 ├── app.module.ts                        # Root module điều phối
 │
 ├── common/                              # Tài nguyên dùng chung (Shared Kernel)
-│   ├── domain/                          # Base Entity, Value Objects, Domain Errors, Interfaces
-│   ├── application/                     # Base UseCase, Result/Either pattern, Common DTOs
-│   ├── infrastructure/                  # TypeORM Base Repository, PostgreSQL config, Logging
-│   └── presentation/                    # Global Exception Filters, Pipes, Guards, Decorators
+│   ├── infrastructure/                  # Cấu hình đa môi trường & TypeORM DatabaseModule
+│   │   ├── config/                      # app.config.ts, database.config.ts
+│   │   └── database/                    # database.module.ts, data-source.ts, migrations/
+│   ├── presentation/                    # Global Exception Filters & DTOs
+│   │   ├── filters/                     # http-exception.filter.ts
+│   │   └── dto/                         # error-message.dto.ts, validation-error-response.dto.ts
+│   └── common.module.ts                 # Export ConfigModule và DatabaseModule
 │
 └── modules/
-    └── <feature_name>/                  # Ví dụ: auth, services, bookings, providers, reports
+    ├── health/                          # Phân hệ Health Check (đã hoàn thiện ở Phase 0)
+    │   ├── application/services/        # health.service.ts
+    │   ├── presentation/controllers/    # health.controller.ts (GET /api/v1/health)
+    │   ├── presentation/dto/            # health-check-response.dto.ts
+    │   └── health.module.ts
+    └── <feature_name>/                  # Các phân hệ tiếp theo (users, auth, providers, services, bookings, reports)
         ├── domain/                      # 1. Lõi nghiệp vụ (Domain Layer)
         │   ├── entities/                # Pure Domain Entities (không phụ thuộc framework/ORM)
         │   ├── value-objects/           # Giá trị bất biến (Money, Email, TimeRange, Capacity)
@@ -123,6 +131,13 @@ pnpm run lint
 
 # Tự động định dạng code với Prettier
 pnpm run format
+
+# Quản lý Database Migrations (TypeORM)
+pnpm run migration:create <duong_dan_file>         # Tạo file migration rỗng
+pnpm run migration:generate <duong_dan_file>       # Tự động sinh migration từ Entity
+pnpm run migration:run                             # Thực thi các migration đang chờ
+pnpm run migration:revert                          # Hoàn tác migration gần nhất
+pnpm run migration:show                            # Xem danh sách và trạng thái migrations
 ```
 
 ---
@@ -152,15 +167,69 @@ pnpm run test:e2e
 ## 6. Cơ sở dữ liệu & Migrations (PostgreSQL 16)
 
 - Mọi entity database đều ánh xạ chuẩn xác với PostgreSQL 16.
-- Sử dụng **TypeORM Migrations** để quản lý thay đổi schema.
-- **Lưu ý**: Tuyệt đối không bật `synchronize: true` trong môi trường Production để bảo toàn dữ liệu.
+- Sử dụng **TypeORM Migrations** để quản lý thay đổi schema cơ sở dữ liệu.
+- **Lưu ý bảo mật & an toàn dữ liệu**: Tuyệt đối không bật `synchronize: true` trong môi trường Production.
+- **Thư mục lưu trữ migrations**: `src/common/infrastructure/database/migrations/`
+- **File cấu hình DataSource cho CLI**: `src/common/infrastructure/database/data-source.ts`
+
+### 6.1. Hướng dẫn tạo Migration
+
+#### Cách 1: Tự động sinh migration từ Entity (Auto-generate Migration)
+Sử dụng khi bạn đã cập nhật hoặc thêm mới các TypeORM Entity và muốn TypeORM tự động đối chiếu schema cơ sở dữ liệu để sinh câu lệnh migration:
+
+```bash
+# Cú pháp qua npm script (tự động build code trước khi chạy)
+pnpm run migration:generate src/common/infrastructure/database/migrations/<TenMigration>
+
+# Hoặc dùng TypeORM CLI trực tiếp
+pnpm build
+pnpm typeorm migration:generate src/common/infrastructure/database/migrations/<TenMigration> -d dist/common/infrastructure/database/data-source.js
+```
+
+*Ví dụ:*
+```bash
+pnpm run migration:generate src/common/infrastructure/database/migrations/CreateUsersTable
+```
+
+#### Cách 2: Tạo file migration rỗng (Blank Migration)
+Sử dụng khi muốn tự viết thủ công các câu lệnh SQL DDL/DML tùy chỉnh trong phương thức `up()` và `down()`:
+
+```bash
+# Cú pháp qua npm script
+pnpm run migration:create src/common/infrastructure/database/migrations/<TenMigration>
+
+# Hoặc dùng TypeORM CLI trực tiếp
+pnpm typeorm migration:create src/common/infrastructure/database/migrations/<TenMigration>
+```
+
+*Ví dụ:*
+```bash
+pnpm run migration:create src/common/infrastructure/database/migrations/SeedInitialRoles
+```
+
+### 6.2. Các lệnh quản lý Migration khác
+
+```bash
+# Thực thi tất cả migrations đang chờ (pending)
+pnpm run migration:run
+# hoặc: pnpm typeorm migration:run -d dist/common/infrastructure/database/data-source.js
+
+# Hoàn tác migration gần nhất (revert)
+pnpm run migration:revert
+# hoặc: pnpm typeorm migration:revert -d dist/common/infrastructure/database/data-source.js
+
+# Xem danh sách các migration đã chạy và chưa chạy
+pnpm run migration:show
+# hoặc: pnpm typeorm migration:show -d dist/common/infrastructure/database/data-source.js
+```
 
 ---
 
 ## 7. Tài liệu API (Swagger UI)
 
-Khi ứng dụng backend đang chạy, tài liệu OpenAPI / Swagger UI được tự động phát sinh tại:
-- **URL**: `http://localhost:3000/api/docs`
+- **Tiền tố API toàn cục (Global Prefix)**: Mọi endpoint API đều được định tuyến qua tiền tố `/api/v1` (được cấu hình tại `src/main.ts`).
+- **Swagger UI**: Khi ứng dụng backend đang chạy, tài liệu OpenAPI / Swagger UI được tự động phát sinh tại:
+  - **URL**: `http://localhost:3000/api/docs`
 
 ---
 
@@ -169,4 +238,5 @@ Khi ứng dụng backend đang chạy, tài liệu OpenAPI / Swagger UI được
 - Trước khi thực hiện thay đổi, vui lòng đọc kỹ:
   - [Root AGENTS.md](../AGENTS.md) - Ranh giới an toàn và quy tắc phát triển tổng thể.
   - [Backend AGENTS.md](./AGENTS.md) - Quy chuẩn chi tiết cho Backend.
-  - [.agent/context/01-workflow-and-ai-rules.md](../.agent/context/01-workflow-and-ai-rules.md) - Quy trình Git và mẫu khai báo AI Attribution (Course 9).
+  - [.agents/context/01-workflow-and-ai-rules.md](../.agents/context/01-workflow-and-ai-rules.md) - Quy trình Git và mẫu khai báo AI Attribution.
+  - [.agents/context/02-backend-architecture-and-standards.md](../.agents/context/02-backend-architecture-and-standards.md) - Tiêu chuẩn kiến trúc Clean Architecture, quy chuẩn API, Database và Testing cho Backend.
