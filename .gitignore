@@ -13,3 +13,6 @@
 # PNPM
 .pnpm-store
 node_modules
+
+# Docs
+pull_requests/

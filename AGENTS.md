@@ -30,7 +30,7 @@ Dưới đây là các **lệnh cấm tuyệt đối** và nguyên tắc an toà
      - **Tổng quan thay đổi (Summary of Changes)**: Dựa trên toàn bộ diff thực tế trên branch hiện tại.
      - **Khai báo mức độ sử dụng AI**: Phân định rõ thành phần do AI sinh (AI-Generated).
      - **Phương thức kiểm chứng (Verification Steps)**: Checklist linter, build, test coverage, tuân thủ an toàn dữ liệu. phần do con người làm, kiểm chứng.
-  3. **Tự động kích hoạt**: Khi Developer yêu cầu "mẫu khai báo pull request", Agent phải tự động phân tích và viết ra đầy đủ theo đúng mẫu ràng buộc trên.
+  3. **Tự động tạo file trong `docs/pull_requests/`**: Khi Developer yêu cầu "mẫu khai báo pull request", Agent phải tự động phân tích toàn bộ thay đổi, tạo 1 file markdown (`.md`) chứa toàn bộ nội dung khai báo PR đặt trong thư mục `docs/pull_requests/` (đặt tên file theo mã task hoặc tên nhánh, ví dụ: `docs/pull_requests/<task-id>.md` hoặc `docs/pull_requests/<tên-nhánh>.md`), đồng thời xuất nội dung ra phản hồi kèm đường dẫn tương đối của file vừa tạo.
   4. Chi tiết xem tại: [.agents/context/01-workflow-and-ai-rules.md](.agents/context/01-workflow-and-ai-rules.md).
 
 ### 1.4. Quy định về đường dẫn (Relative Path Constraint)
@@ -67,6 +67,7 @@ Dưới đây là các **lệnh cấm tuyệt đối** và nguyên tắc an toà
 - **Tài liệu quy trình & AI**:
   - [.agents/context/01-workflow-and-ai-rules.md](.agents/context/01-workflow-and-ai-rules.md): Quy trình Git, Guardrails và mẫu khai báo AI Attribution.
   - [.agents/context/02-backend-architecture-and-standards.md](.agents/context/02-backend-architecture-and-standards.md): Tiêu chuẩn kiến trúc Clean Architecture, quy chuẩn API, Database và Testing cho Backend.
+  - [docs/task_conventions.md](docs/task_conventions.md): Quy ước đặt tên Task, Issue, Branch, Commit và Pull Request.
 
 ---
 
