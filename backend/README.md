@@ -123,6 +123,13 @@ pnpm run lint
 
 # Tự động định dạng code với Prettier
 pnpm run format
+
+# Quản lý Database Migrations (TypeORM)
+pnpm run migration:create <duong_dan_file>         # Tạo file migration rỗng
+pnpm run migration:generate <duong_dan_file>       # Tự động sinh migration từ Entity
+pnpm run migration:run                             # Thực thi các migration đang chờ
+pnpm run migration:revert                          # Hoàn tác migration gần nhất
+pnpm run migration:show                            # Xem danh sách và trạng thái migrations
 ```
 
 ---
@@ -152,8 +159,61 @@ pnpm run test:e2e
 ## 6. Cơ sở dữ liệu & Migrations (PostgreSQL 16)
 
 - Mọi entity database đều ánh xạ chuẩn xác với PostgreSQL 16.
-- Sử dụng **TypeORM Migrations** để quản lý thay đổi schema.
-- **Lưu ý**: Tuyệt đối không bật `synchronize: true` trong môi trường Production để bảo toàn dữ liệu.
+- Sử dụng **TypeORM Migrations** để quản lý thay đổi schema cơ sở dữ liệu.
+- **Lưu ý bảo mật & an toàn dữ liệu**: Tuyệt đối không bật `synchronize: true` trong môi trường Production.
+- **Thư mục lưu trữ migrations**: `src/common/infrastructure/database/migrations/`
+- **File cấu hình DataSource cho CLI**: `src/common/infrastructure/database/data-source.ts`
+
+### 6.1. Hướng dẫn tạo Migration
+
+#### Cách 1: Tự động sinh migration từ Entity (Auto-generate Migration)
+Sử dụng khi bạn đã cập nhật hoặc thêm mới các TypeORM Entity và muốn TypeORM tự động đối chiếu schema cơ sở dữ liệu để sinh câu lệnh migration:
+
+```bash
+# Cú pháp qua npm script (tự động build code trước khi chạy)
+pnpm run migration:generate src/common/infrastructure/database/migrations/<TenMigration>
+
+# Hoặc dùng TypeORM CLI trực tiếp
+pnpm build
+pnpm typeorm migration:generate src/common/infrastructure/database/migrations/<TenMigration> -d dist/common/infrastructure/database/data-source.js
+```
+
+*Ví dụ:*
+```bash
+pnpm run migration:generate src/common/infrastructure/database/migrations/CreateUsersTable
+```
+
+#### Cách 2: Tạo file migration rỗng (Blank Migration)
+Sử dụng khi muốn tự viết thủ công các câu lệnh SQL DDL/DML tùy chỉnh trong phương thức `up()` và `down()`:
+
+```bash
+# Cú pháp qua npm script
+pnpm run migration:create src/common/infrastructure/database/migrations/<TenMigration>
+
+# Hoặc dùng TypeORM CLI trực tiếp
+pnpm typeorm migration:create src/common/infrastructure/database/migrations/<TenMigration>
+```
+
+*Ví dụ:*
+```bash
+pnpm run migration:create src/common/infrastructure/database/migrations/SeedInitialRoles
+```
+
+### 6.2. Các lệnh quản lý Migration khác
+
+```bash
+# Thực thi tất cả migrations đang chờ (pending)
+pnpm run migration:run
+# hoặc: pnpm typeorm migration:run -d dist/common/infrastructure/database/data-source.js
+
+# Hoàn tác migration gần nhất (revert)
+pnpm run migration:revert
+# hoặc: pnpm typeorm migration:revert -d dist/common/infrastructure/database/data-source.js
+
+# Xem danh sách các migration đã chạy và chưa chạy
+pnpm run migration:show
+# hoặc: pnpm typeorm migration:show -d dist/common/infrastructure/database/data-source.js
+```
 
 ---
 
