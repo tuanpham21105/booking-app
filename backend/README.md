@@ -24,17 +24,25 @@ Hệ thống backend được tổ chức theo module chức năng (Vertical Sli
 
 ```
 backend/src/
-├── main.ts                              # Điểm khởi chạy ứng dụng (Bootstrap, Swagger, ValidationPipe)
+├── main.ts                              # Điểm khởi chạy ứng dụng (Bootstrap, Global Prefix /api/v1, Swagger, ValidationPipe, HttpExceptionFilter)
 ├── app.module.ts                        # Root module điều phối
 │
 ├── common/                              # Tài nguyên dùng chung (Shared Kernel)
-│   ├── domain/                          # Base Entity, Value Objects, Domain Errors, Interfaces
-│   ├── application/                     # Base UseCase, Result/Either pattern, Common DTOs
-│   ├── infrastructure/                  # TypeORM Base Repository, PostgreSQL config, Logging
-│   └── presentation/                    # Global Exception Filters, Pipes, Guards, Decorators
+│   ├── infrastructure/                  # Cấu hình đa môi trường & TypeORM DatabaseModule
+│   │   ├── config/                      # app.config.ts, database.config.ts
+│   │   └── database/                    # database.module.ts, data-source.ts, migrations/
+│   ├── presentation/                    # Global Exception Filters & DTOs
+│   │   ├── filters/                     # http-exception.filter.ts
+│   │   └── dto/                         # error-message.dto.ts, validation-error-response.dto.ts
+│   └── common.module.ts                 # Export ConfigModule và DatabaseModule
 │
 └── modules/
-    └── <feature_name>/                  # Ví dụ: auth, services, bookings, providers, reports
+    ├── health/                          # Phân hệ Health Check (đã hoàn thiện ở Phase 0)
+    │   ├── application/services/        # health.service.ts
+    │   ├── presentation/controllers/    # health.controller.ts (GET /api/v1/health)
+    │   ├── presentation/dto/            # health-check-response.dto.ts
+    │   └── health.module.ts
+    └── <feature_name>/                  # Các phân hệ tiếp theo (users, auth, providers, services, bookings, reports)
         ├── domain/                      # 1. Lõi nghiệp vụ (Domain Layer)
         │   ├── entities/                # Pure Domain Entities (không phụ thuộc framework/ORM)
         │   ├── value-objects/           # Giá trị bất biến (Money, Email, TimeRange, Capacity)
@@ -219,8 +227,9 @@ pnpm run migration:show
 
 ## 7. Tài liệu API (Swagger UI)
 
-Khi ứng dụng backend đang chạy, tài liệu OpenAPI / Swagger UI được tự động phát sinh tại:
-- **URL**: `http://localhost:3000/api/docs`
+- **Tiền tố API toàn cục (Global Prefix)**: Mọi endpoint API đều được định tuyến qua tiền tố `/api/v1` (được cấu hình tại `src/main.ts`).
+- **Swagger UI**: Khi ứng dụng backend đang chạy, tài liệu OpenAPI / Swagger UI được tự động phát sinh tại:
+  - **URL**: `http://localhost:3000/api/docs`
 
 ---
 
@@ -229,4 +238,5 @@ Khi ứng dụng backend đang chạy, tài liệu OpenAPI / Swagger UI được
 - Trước khi thực hiện thay đổi, vui lòng đọc kỹ:
   - [Root AGENTS.md](../AGENTS.md) - Ranh giới an toàn và quy tắc phát triển tổng thể.
   - [Backend AGENTS.md](./AGENTS.md) - Quy chuẩn chi tiết cho Backend.
-  - [.agent/context/01-workflow-and-ai-rules.md](../.agent/context/01-workflow-and-ai-rules.md) - Quy trình Git và mẫu khai báo AI Attribution (Course 9).
+  - [.agents/context/01-workflow-and-ai-rules.md](../.agents/context/01-workflow-and-ai-rules.md) - Quy trình Git và mẫu khai báo AI Attribution.
+  - [.agents/context/02-backend-architecture-and-standards.md](../.agents/context/02-backend-architecture-and-standards.md) - Tiêu chuẩn kiến trúc Clean Architecture, quy chuẩn API, Database và Testing cho Backend.

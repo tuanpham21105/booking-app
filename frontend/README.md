@@ -100,7 +100,7 @@ cp .env.example .env
 ```
 
 Các biến môi trường cơ bản:
-- `VITE_API_BASE_URL`: Địa chỉ API Backend (ví dụ: `http://localhost:3000/api`)
+- `VITE_API_BASE_URL`: Địa chỉ API Backend (ví dụ: `http://localhost:3000/api/v1`)
 
 ---
 
@@ -136,4 +136,4 @@ npm run lint
 - Trước khi thực hiện thay đổi, vui lòng đọc kỹ:
   - [Root AGENTS.md](../AGENTS.md) - Ranh giới an toàn và quy tắc phát triển tổng thể.
   - [Frontend AGENTS.md](./AGENTS.md) - Quy chuẩn chi tiết cho Frontend.
-  - [.agent/context/01-workflow-and-ai-rules.md](../.agent/context/01-workflow-and-ai-rules.md) - Quy trình Git và mẫu khai báo AI Attribution (Course 9).
+  - [.agents/context/01-workflow-and-ai-rules.md](../.agents/context/01-workflow-and-ai-rules.md) - Quy trình Git và mẫu khai báo AI Attribution (Course 9).

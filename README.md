@@ -58,9 +58,11 @@ booking-app/
 │
 ├── backend/                 # Phân hệ Backend (NestJS 12)
 │   ├── src/
-│   │   ├── common/          # Tài nguyên dùng chung (Shared Kernel theo Clean Architecture)
-│   │   └── modules/         # Các lát cắt tính năng (Vertical Slice: Domain, Application, Infra, Presentation)
-│   ├── test/                # Kiểm thử E2E và cấu hình Jest
+│   │   ├── common/          # Tài nguyên dùng chung (Shared Kernel: config, database, filters, dto)
+│   │   └── modules/         # Các lát cắt tính năng (Vertical Slice)
+│   │       └── health/      # Phân hệ Health Check (giám sát server & CSDL)
+│   ├── test/                # Kiểm thử E2E (app, health) và cấu hình Jest
+│   ├── .env.example         # File biến môi trường mẫu cho Backend Dev
 │   ├── AGENTS.md            # Hướng dẫn chi tiết cho Agent khi làm việc ở Backend
 │   ├── Dockerfile.dev       # Dockerfile môi trường dev cho Backend
 │   └── package.json
@@ -125,7 +127,7 @@ Bảng các biến môi trường cấu hình cơ bản:
 | `BACKEND_PORT` / `PORT` | `3000` | Cổng phục vụ API của NestJS Backend |
 | `DB_HOST` | `postgres` | Tên hostname nội bộ của service database trong mạng Docker |
 | `FRONTEND_PORT` | `5173` | Cổng truy cập Web UI của React + Vite |
-| `VITE_API_URL` | `http://localhost:3000` | URL endpoint Backend mà Frontend sẽ gọi |
+| `VITE_API_URL` | `http://localhost:3000/api/v1` | URL tiền tố API Backend mà Frontend sẽ gọi |
 
 ### 5.3. Khởi chạy toàn bộ hệ thống bằng Docker Compose
 
@@ -166,7 +168,9 @@ docker compose -f docker-compose.dev.yml up -d --build
 
 #### Địa chỉ truy cập các dịch vụ:
 - **Frontend App**: [http://localhost:5173](http://localhost:5173) (Hỗ trợ Fast Refresh / Hot Module Replacement)
-- **Backend API**: [http://localhost:3000](http://localhost:3000) (NestJS Hot-reload)
+- **Backend API**: [http://localhost:3000/api/v1](http://localhost:3000/api/v1) (Tiền tố API toàn cục `/api/v1`, NestJS Hot-reload)
+- **Swagger UI**: [http://localhost:3000/api/docs](http://localhost:3000/api/docs) (Tài liệu OpenAPI tương tác trực tiếp)
+- **Health Check**: [http://localhost:3000/api/v1/health](http://localhost:3000/api/v1/health) (Kiểm tra trạng thái server và kết nối PostgreSQL)
 - **PostgreSQL Database**: `localhost:5432` (kết nối qua DBeaver, pgAdmin hoặc TablePlus với user: `postgres`, password: `postgres`, database: `booking_db`)
 
 ### 5.4. Các lệnh quản trị thường dùng
@@ -191,8 +195,11 @@ docker compose -f docker-compose.dev.yml up -d --build
   # Chạy linter backend
   docker compose -f docker-compose.dev.yml exec backend pnpm run lint
 
-  # Chạy test backend
+  # Chạy unit test backend
   docker compose -f docker-compose.dev.yml exec backend pnpm run test:cov
+
+  # Chạy kiểm thử e2e backend
+  docker compose -f docker-compose.dev.yml exec backend pnpm run test:e2e
 
   # Chạy linter frontend
   docker compose -f docker-compose.dev.yml exec frontend npm run lint
