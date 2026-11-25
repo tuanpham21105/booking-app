@@ -112,9 +112,9 @@ Thiết lập toàn bộ khung kiến trúc Clean Architecture dùng chung (`src
   - Trường hợp ngoại lệ xảy ra $\rightarrow$ Global `HttpExceptionFilter` bắt lại và chuẩn hóa JSON lỗi theo đúng hợp đồng mục 2.3 của API Contract.
 
 #### 4. Mục tiêu đầu ra (Deliverables)
-- [ ] Khung thư mục Clean Architecture chuẩn hóa.
-- [ ] `DatabaseModule` kết nối thành công tới PostgreSQL 16-alpine.
-- [ ] Global Exception Filter & Validation Pipe hoạt động ổn định.
+- [x] Khung thư mục Clean Architecture chuẩn hóa.
+- [x] `DatabaseModule` kết nối thành công tới PostgreSQL 16-alpine.
+- [x] Global Exception Filter & Validation Pipe hoạt động ổn định.
 - [ ] Swagger UI sẵn sàng tại `/api/docs`.
 - [ ] Endpoint `GET /api/v1/health` trả về trạng thái máy chủ `200 OK`.
 
