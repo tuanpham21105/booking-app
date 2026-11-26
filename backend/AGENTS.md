@@ -49,7 +49,13 @@ backend/src/
     │   ├── infrastructure/              # UserOrmEntity, TypeOrmUserRepository Adapter
     │   ├── presentation/                # UsersController (/api/v1/users), Swagger DTOs
     │   └── users.module.ts
-    └── <feature_name>/                  # Các phân hệ tính năng tiếp theo (auth, providers, services, bookings, reports)
+    ├── auth/                            # Phân hệ Xác thực & Cấp quyền (Phase 2: JWT Access/Refresh, @nestjs/authentication & authorization)
+    │   ├── application/services/        # auth.service.ts, jwt.service.ts (JwtBearerProvider)
+    │   ├── application/dto/             # authentication-user-payload.dto.ts
+    │   ├── presentation/controllers/    # auth.controller.ts (register, login, me, refresh)
+    │   ├── presentation/dto/            # request/response DTOs kèm validation
+    │   └── auth.module.ts
+    └── <feature_name>/                  # Các phân hệ tính năng tiếp theo (providers, services, bookings, reports)
         ├── domain/                      # 1. Lõi nghiệp vụ (Domain Layer)
         │   ├── entities/                # Pure Domain Entities (không phụ thuộc TypeORM/NestJS)
         │   ├── value-objects/           # Giá trị bất biến (Money, Email, TimeRange)

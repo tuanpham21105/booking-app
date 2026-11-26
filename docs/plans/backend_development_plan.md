@@ -234,10 +234,13 @@ Xây dựng cơ chế xác thực danh tính bằng JWT (Access Token & Refresh 
   5. Trả về thông tin người dùng kèm cặp token theo schema `LoginResponseDto`.
 
 #### 4. Mục tiêu đầu ra (Deliverables)
-- [ ] Cơ chế phát hành và xác thực JWT token chuẩn hóa.
-- [ ] Module `AuthModule` hoàn thiện 4 API endpoint.
-- [ ] `JwtAuthGuard` và `RolesGuard` sẵn sàng tái sử dụng cho tất cả các Controller của các phân hệ sau.
-- [ ] Khách vãng lai tự đăng ký tài khoản `CUSTOMER` thành công mà không thể đăng ký các vai trò khác.
+- [x] Cơ chế phát hành và xác thực JWT token chuẩn hóa.
+- [x] Module `AuthModule` hoàn thiện 4 API endpoint.
+- [x] `RolePolicy` và `@nestjs/authorization` kết hợp `@nestjs/authentication` sẵn sàng bảo vệ API cho các phân hệ tiếp theo.
+- [x] Khách vãng lai tự đăng ký tài khoản `CUSTOMER` thành công mà không thể đăng ký các vai trò khác.
+- [x] Tích hợp Swagger UI Authorize Bearer Token tiện dụng cho việc kiểm thử API.
+
+> **Ghi chú kiến trúc từ Developer Review**: Thay vì xây dựng các lớp abstraction cồng kềnh (ITokenService, custom JwtStrategy/Passport guards), module được tối ưu sử dụng trực tiếp `JwtBearerProvider` và `TokenService` từ `@nestjs/authentication` cùng `RolePolicy` từ `@nestjs/authorization`. Sự điều chỉnh này giúp mã nguồn thực dụng, nhỏ gọn, tránh over-engineering cho quy mô của dự án.
 
 #### 5. Chiến lược kiểm thử độc lập (Independent Testing)
 - **Unit Test (Use Cases)**:

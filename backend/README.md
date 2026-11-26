@@ -49,7 +49,13 @@ backend/src/
     │   ├── infrastructure/              # UserOrmEntity, TypeOrmUserRepository Adapter
     │   ├── presentation/                # UsersController (/api/v1/users), Swagger DTOs
     │   └── users.module.ts
-    └── <feature_name>/                  # Các phân hệ tiếp theo (auth, providers, services, bookings, reports)
+    ├── auth/                            # Phân hệ Xác thực & Cấp quyền JWT (đã hoàn thiện ở Phase 2)
+    │   ├── application/services/        # auth.service.ts, jwt.service.ts (JwtBearerProvider)
+    │   ├── application/dto/             # authentication-user-payload.dto.ts
+    │   ├── presentation/controllers/    # auth.controller.ts (register, login, me, refresh)
+    │   ├── presentation/dto/            # request/response DTOs kèm validation
+    │   └── auth.module.ts
+    └── <feature_name>/                  # Các phân hệ tiếp theo (providers, services, bookings, reports)
         ├── domain/                      # 1. Lõi nghiệp vụ (Domain Layer)
         │   ├── entities/                # Pure Domain Entities (không phụ thuộc framework/ORM)
         │   ├── value-objects/           # Giá trị bất biến (Money, Email, TimeRange, Capacity)
@@ -241,10 +247,16 @@ pnpm run migration:show
 - **Tiền tố API toàn cục (Global Prefix)**: Mọi endpoint API đều được định tuyến qua tiền tố `/api/v1` (được cấu hình tại `src/main.ts`).
 - **Swagger UI**: Khi ứng dụng backend đang chạy, tài liệu OpenAPI / Swagger UI được tự động phát sinh tại:
   - **URL**: `http://localhost:3000/api/docs`
+  - Hỗ trợ nút **Authorize** để gán Access Token (JWT Bearer) trực tiếp trên trình duyệt, tự động lưu token qua các lần tải lại trang (`persistAuthorization: true`) và hỗ trợ tìm kiếm API (`filter: true`).
 
 ### Các phân hệ API hiện tại:
 - **Health Check (`/api/v1/health`)**:
   - `GET /api/v1/health`: Kiểm tra trạng thái máy chủ và kết nối PostgreSQL.
+- **Xác thực & Cấp quyền (`/api/v1/auth`)**:
+  - `POST /api/v1/auth/register`: Đăng ký tài khoản Khách hàng mới (Customer), cấp cặp Access & Refresh Token.
+  - `POST /api/v1/auth/login`: Đăng nhập bằng Email/Password, cấp cặp Access Token & Refresh Token.
+  - `GET /api/v1/auth/me`: Lấy hồ sơ tài khoản hiện tại (yêu cầu Bearer Access Token).
+  - `POST /api/v1/auth/refresh`: Làm mới Access Token thông qua Refresh Token (Token Rotation).
 - **Quản lý Người dùng (`/api/v1/users`)**:
   - `GET /api/v1/users`: Danh sách tài khoản phân trang, tìm kiếm theo họ tên/email, lọc theo role (`ADMIN`, `STAFF`, `CUSTOMER`).
   - `GET /api/v1/users/:id`: Xem chi tiết thông tin một tài khoản.

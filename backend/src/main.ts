@@ -16,12 +16,34 @@ async function bootstrap() {
 
   const swaggerConfig = new DocumentBuilder()
     .setTitle('Booking App API')
-    .setDescription('Booking App API documentation')
+    .setDescription(
+      'Booking App API documentation. Sử dụng nút **Authorize** để gán Access Token (JWT Bearer) cho các API yêu cầu xác thực.',
+    )
     .setVersion('1.0')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        name: 'Authorization',
+        description: 'Nhập JWT access token vào đây (Swagger sẽ tự thêm tiền tố Bearer)',
+        in: 'header',
+      },
+      'bearer',
+    )
     .build();
 
   const document = SwaggerModule.createDocument(app, swaggerConfig);
-  SwaggerModule.setup('api/docs', app, document);
+  SwaggerModule.setup('api/docs', app, document, {
+    swaggerOptions: {
+      persistAuthorization: true,
+      tagsSorter: 'alpha',
+      operationsSorter: 'alpha',
+      filter: true,
+      docExpansion: 'none',
+    },
+    customSiteTitle: 'Booking App API Docs',
+  });
 
   await app.listen(port);
 }
