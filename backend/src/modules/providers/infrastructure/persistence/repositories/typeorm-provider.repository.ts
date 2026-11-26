@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsWhere, ILike, Repository } from 'typeorm';
 import { ProviderRepository } from '../../../domain/repositories/provider.repository.port';
 import { Provider } from '../../../domain/entities/provider.entity';
+import { Service } from '../../../../services/domain/entities/service.entity';
 import { ProviderOrmEntity } from '../entities/provider.orm-entity';
 import {
   calculatePagination,
@@ -20,8 +21,19 @@ export class TypeOrmProviderRepository extends ProviderRepository {
   }
 
   async findById(id: number): Promise<Provider | null> {
-    const entity = await this.providerOrmRepository.findOne({ where: { id } });
-    return convertToDomain(Provider, entity);
+    const entity = await this.providerOrmRepository.findOne({
+      where: { id },
+      relations: { services: true },
+    });
+    if (!entity) {
+      return null;
+    }
+
+    const provider = convertToDomain(Provider, entity);
+    if (entity.services) {
+      provider.services = convertToDomainList(Service, entity.services);
+    }
+    return provider;
   }
 
   async findByName(name: string): Promise<Provider | null> {

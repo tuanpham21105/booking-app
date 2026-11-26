@@ -5,7 +5,9 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   Index,
+  OneToMany,
 } from 'typeorm';
+import type { ServiceOrmEntity } from '../../../../services/infrastructure/persistence/entities/service.orm-entity';
 
 @Entity('providers')
 export class ProviderOrmEntity {
@@ -32,4 +34,7 @@ export class ProviderOrmEntity {
     default: () => 'CURRENT_TIMESTAMP',
   })
   updatedAt: Date;
+
+  @OneToMany('ServiceOrmEntity', 'provider')
+  services: ServiceOrmEntity[];
 }
