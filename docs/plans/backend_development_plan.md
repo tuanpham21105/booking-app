@@ -234,10 +234,10 @@ Xây dựng cơ chế xác thực danh tính bằng JWT (Access Token & Refresh 
   5. Trả về thông tin người dùng kèm cặp token theo schema `LoginResponseDto`.
 
 #### 4. Mục tiêu đầu ra (Deliverables)
-- [ ] Cơ chế phát hành và xác thực JWT token chuẩn hóa.
-- [ ] Module `AuthModule` hoàn thiện 4 API endpoint.
+- [x] Cơ chế phát hành và xác thực JWT token chuẩn hóa.
+- [x] Module `AuthModule` hoàn thiện 4 API endpoint.
 - [ ] `JwtAuthGuard` và `RolesGuard` sẵn sàng tái sử dụng cho tất cả các Controller của các phân hệ sau.
-- [ ] Khách vãng lai tự đăng ký tài khoản `CUSTOMER` thành công mà không thể đăng ký các vai trò khác.
+- [x] Khách vãng lai tự đăng ký tài khoản `CUSTOMER` thành công mà không thể đăng ký các vai trò khác.
 
 #### 5. Chiến lược kiểm thử độc lập (Independent Testing)
 - **Unit Test (Use Cases)**:

@@ -1,6 +1,7 @@
 import { adminConfig } from './admin.config';
 import { appConfig } from './app.config';
 import { databaseConfig } from './database.config';
+import { jwtConfig } from './jwt.config';
 
 describe('Config', () => {
   const originalEnv = process.env;
@@ -95,6 +96,28 @@ describe('Config', () => {
       expect(config.name).toBe('Super Admin');
       expect(config.email).toBe('superadmin@example.com');
       expect(config.password).toBe('CustomAdminPass123!');
+    });
+  });
+
+  describe('jwtConfig', () => {
+    it('should return default values when env vars are missing', () => {
+      delete process.env.JWT_SECRET;
+      delete process.env.JWT_EXPIRES_IN;
+      delete process.env.JWT_REFRESH_EXPIRES_IN;
+
+      const config = jwtConfig();
+      expect(config.secret).toBe('booking-app-jwt-secret-key-32-characters-min-safety');
+      expect(config.expiresIn).toBe('15m');
+      expect(config.refreshExpiresIn).toBe('7d');
+    });
+
+    it('should preserve duration string when unit is provided', () => {
+      process.env.JWT_EXPIRES_IN = '30m';
+      process.env.JWT_REFRESH_EXPIRES_IN = '14d';
+
+      const config = jwtConfig();
+      expect(config.expiresIn).toBe('30m');
+      expect(config.refreshExpiresIn).toBe('14d');
     });
   });
 });
