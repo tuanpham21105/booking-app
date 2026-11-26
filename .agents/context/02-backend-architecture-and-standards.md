@@ -36,11 +36,13 @@ src/modules/<feature_name>/
 └── <feature_name>.module.ts     # Module NestJS liên kết các dependencies của slice
 ```
 
-### Nguyên tắc phụ thuộc bất biến (Dependency Rule)
+### Nguyên tắc phụ thuộc bất biến (Dependency Rule) & Liên kết tinh gọn
 1. **Domain**: Hoàn toàn độc lập, không import `@nestjs/*`, `typeorm` hay bất kỳ thư viện bên ngoài nào.
 2. **Application**: Chỉ phụ thuộc vào `Domain`; tương tác với tầng ngoài qua Port/Interface.
 3. **Infrastructure & Presentation**: Đóng vai trò Adapters, phụ thuộc vào `Application` và `Domain`.
 4. **Không bỏ qua Mapper**: TypeORM Entity chỉ sống ở Infrastructure; Controller/UseCase chỉ làm việc với Domain Entity hoặc DTO.
+5. **Tái sử dụng Domain Entity giữa các Module (Tránh Over-engineering)**: Cho phép sử dụng xen lẫn các Pure Domain Entity giữa các module chức năng (ví dụ `Provider` chứa `services?: Service[]`, `Service` chứa `provider?: Provider`). Không duplicate entity/interface phụ gây phức tạp hóa mã nguồn.
+6. **Bảo vệ API & Decorator `@Public()`**: Mặc định `@nestjs/authentication` chặn mọi request không kèm token. Bất kỳ API public nào (`/health`, `/auth/login`, `/auth/register`, `/services`, v.v.) bắt buộc phải gắn `@Public()` từ `@nestjs/authentication`.
 
 ---
 

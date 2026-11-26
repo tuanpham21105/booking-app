@@ -61,7 +61,13 @@ backend/src/
     │   ├── infrastructure/              # ProviderOrmEntity, TypeOrmProviderRepository Adapter
     │   ├── presentation/                # ProvidersController (/api/v1/providers), Swagger DTOs
     │   └── providers.module.ts
-    └── <feature_name>/                  # Các phân hệ tiếp theo (services, bookings, reports)
+    ├── services/                        # Phân hệ Danh mục Dịch vụ (đã hoàn thiện ở Phase 4)
+    │   ├── domain/                      # Service Entity, ServiceRepository Port
+    │   ├── application/                 # ServicesService (CRUD, kiểm tra tồn tại Provider), DTOs
+    │   ├── infrastructure/              # ServiceOrmEntity, TypeOrmServiceRepository Adapter
+    │   ├── presentation/                # ServicesController (/api/v1/services), Swagger DTOs
+    │   └── services.module.ts
+    └── <feature_name>/                  # Các phân hệ tiếp theo (schedules, bookings, reports)
         ├── domain/                      # 1. Lõi nghiệp vụ (Domain Layer)
         │   ├── entities/                # Pure Domain Entities (không phụ thuộc framework/ORM)
         │   ├── value-objects/           # Giá trị bất biến (Money, Email, TimeRange, Capacity)
@@ -270,6 +276,18 @@ pnpm run migration:show
   - `PATCH /api/v1/users/:id`: Cập nhật thông tin tài khoản (cấm nâng quyền lên `ADMIN`, cấm sửa tài khoản `ADMIN` theo BR-01).
   - `PATCH /api/v1/users/:id/reset-password`: Đặt lại mật khẩu tài khoản (cấm sửa mật khẩu `ADMIN` theo BR-01).
   - `DELETE /api/v1/users/:id`: Xóa tài khoản người dùng (cấm xóa tài khoản `ADMIN` theo BR-01).
+- **Quản lý Nhà cung cấp (`/api/v1/providers`)**:
+  - `GET /api/v1/providers`: Danh sách nhà cung cấp phân trang, tìm kiếm theo tên (quyền `STAFF`, `ADMIN`).
+  - `GET /api/v1/providers/:id`: Xem chi tiết nhà cung cấp kèm danh sách dịch vụ trực thuộc.
+  - `POST /api/v1/providers`: Thêm mới nhà cung cấp.
+  - `PATCH /api/v1/providers/:id`: Cập nhật tên và mô tả nhà cung cấp.
+  - `DELETE /api/v1/providers/:id`: Xóa nhà cung cấp (cascade xóa toàn bộ dịch vụ và lịch liên quan).
+- **Danh mục Dịch vụ (`/api/v1/services`)**:
+  - `GET /api/v1/services`: Xem & tìm kiếm danh sách dịch vụ phân trang, hỗ trợ lọc theo nhà cung cấp (`Public`).
+  - `GET /api/v1/services/:id`: Xem chi tiết dịch vụ kèm nhà cung cấp và lịch hẹn (`Public`).
+  - `POST /api/v1/services`: Tạo mới dịch vụ cho nhà cung cấp (quyền `STAFF`, `ADMIN`).
+  - `PATCH /api/v1/services/:id`: Cập nhật tên, mô tả, giá niêm yết hoặc nhà cung cấp.
+  - `DELETE /api/v1/services/:id`: Xóa dịch vụ (cascade xóa lịch hẹn và booking liên quan).
 
 ---
 
