@@ -29,11 +29,12 @@ backend/src/
 │
 ├── common/                              # Tài nguyên dùng chung (Shared Kernel)
 │   ├── infrastructure/                  # Cấu hình đa môi trường & TypeORM DatabaseModule
-│   │   ├── config/                      # app.config.ts, database.config.ts
+│   │   ├── config/                      # app.config.ts, database.config.ts, admin.config.ts
 │   │   └── database/                    # database.module.ts, data-source.ts, migrations/
 │   ├── presentation/                    # Global Exception Filters & DTOs
 │   │   ├── filters/                     # http-exception.filter.ts
 │   │   └── dto/                         # error-message.dto.ts, validation-error-response.dto.ts
+│   ├── utils/                           # entity-converter.util.ts, pagination.util.ts
 │   └── common.module.ts                 # Export ConfigModule và DatabaseModule
 │
 └── modules/
@@ -42,7 +43,13 @@ backend/src/
     │   ├── presentation/controllers/    # health.controller.ts (GET /api/v1/health)
     │   ├── presentation/dto/            # health-check-response.dto.ts
     │   └── health.module.ts
-    └── <feature_name>/                  # Các phân hệ tiếp theo (users, auth, providers, services, bookings, reports)
+    ├── users/                           # Phân hệ Quản lý Người dùng (đã hoàn thiện ở Phase 1)
+    │   ├── domain/                      # User Entity, UserRole Enum, UserRepository Port
+    │   ├── application/                 # UsersService (CRUD, BR-01), AdminSeederService (Seed Admin), DTOs
+    │   ├── infrastructure/              # UserOrmEntity, TypeOrmUserRepository Adapter
+    │   ├── presentation/                # UsersController (/api/v1/users), Swagger DTOs
+    │   └── users.module.ts
+    └── <feature_name>/                  # Các phân hệ tiếp theo (auth, providers, services, bookings, reports)
         ├── domain/                      # 1. Lõi nghiệp vụ (Domain Layer)
         │   ├── entities/                # Pure Domain Entities (không phụ thuộc framework/ORM)
         │   ├── value-objects/           # Giá trị bất biến (Money, Email, TimeRange, Capacity)
@@ -105,6 +112,9 @@ Các biến môi trường cơ bản cần cấu hình:
 - `DB_USERNAME`: Tài khoản cơ sở dữ liệu
 - `DB_PASSWORD`: Mật khẩu cơ sở dữ liệu
 - `DB_DATABASE`: Tên database (ví dụ: `booking_app`)
+- `INITIAL_ADMIN_NAME`: Họ và tên tài khoản Quản trị viên khởi tạo (mặc định: `System Admin`)
+- `INITIAL_ADMIN_EMAIL`: Email của tài khoản Admin duy nhất (mặc định: `admin@bookingapp.com`)
+- `INITIAL_ADMIN_PASSWORD`: Mật khẩu tài khoản Admin khởi tạo (mặc định: `AdminPassword123@`)
 - `JWT_SECRET`: Khóa bí mật ký JWT token
 - `JWT_EXPIRES_IN`: Thời gian hết hạn của JWT (ví dụ: `1d` hoặc `3600s`)
 - `CORS_ORIGIN`: Domain frontend được phép truy cập (ví dụ: `http://localhost:5173`)
@@ -138,6 +148,7 @@ pnpm run migration:generate <duong_dan_file>       # Tự động sinh migration
 pnpm run migration:run                             # Thực thi các migration đang chờ
 pnpm run migration:revert                          # Hoàn tác migration gần nhất
 pnpm run migration:show                            # Xem danh sách và trạng thái migrations
+
 ```
 
 ---
@@ -230,6 +241,17 @@ pnpm run migration:show
 - **Tiền tố API toàn cục (Global Prefix)**: Mọi endpoint API đều được định tuyến qua tiền tố `/api/v1` (được cấu hình tại `src/main.ts`).
 - **Swagger UI**: Khi ứng dụng backend đang chạy, tài liệu OpenAPI / Swagger UI được tự động phát sinh tại:
   - **URL**: `http://localhost:3000/api/docs`
+
+### Các phân hệ API hiện tại:
+- **Health Check (`/api/v1/health`)**:
+  - `GET /api/v1/health`: Kiểm tra trạng thái máy chủ và kết nối PostgreSQL.
+- **Quản lý Người dùng (`/api/v1/users`)**:
+  - `GET /api/v1/users`: Danh sách tài khoản phân trang, tìm kiếm theo họ tên/email, lọc theo role (`ADMIN`, `STAFF`, `CUSTOMER`).
+  - `GET /api/v1/users/:id`: Xem chi tiết thông tin một tài khoản.
+  - `POST /api/v1/users`: Tạo tài khoản mới (`STAFF` hoặc `CUSTOMER`, cấm tạo `ADMIN` theo BR-01).
+  - `PATCH /api/v1/users/:id`: Cập nhật thông tin tài khoản (cấm nâng quyền lên `ADMIN`, cấm sửa tài khoản `ADMIN` theo BR-01).
+  - `PATCH /api/v1/users/:id/reset-password`: Đặt lại mật khẩu tài khoản (cấm sửa mật khẩu `ADMIN` theo BR-01).
+  - `DELETE /api/v1/users/:id`: Xóa tài khoản người dùng (cấm xóa tài khoản `ADMIN` theo BR-01).
 
 ---
 
