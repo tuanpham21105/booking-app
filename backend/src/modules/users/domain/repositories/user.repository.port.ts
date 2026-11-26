@@ -9,7 +9,12 @@ import { UserRole } from '../enums/user-role.enum';
 export abstract class UserRepository {
   abstract findById(id: number): Promise<User | null>;
   abstract findByEmail(email: string): Promise<User | null>;
-  abstract findAll(page?: number, limit?: number): Promise<[User[], number]>;
+  abstract findAll(
+    page?: number,
+    limit?: number,
+    search?: string,
+    role?: UserRole,
+  ): Promise<[User[], number]>;
   abstract create(
     fullName: string,
     email: string,

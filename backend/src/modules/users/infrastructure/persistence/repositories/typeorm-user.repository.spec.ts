@@ -12,6 +12,7 @@ class MockUserOrmRepository {
   findAndCountResult: [UserOrmEntity[], number] = [[], 0];
   lastSkip?: number;
   lastTake?: number;
+  lastWhere?: unknown;
 
   createdEntity?: Partial<UserOrmEntity>;
   savedEntity?: UserOrmEntity;
@@ -26,9 +27,11 @@ class MockUserOrmRepository {
     skip?: number;
     take?: number;
     order?: Record<string, string>;
+    where?: unknown;
   }): Promise<[UserOrmEntity[], number]> {
     this.lastSkip = options.skip;
     this.lastTake = options.take;
+    this.lastWhere = options.where;
     return this.findAndCountResult;
   }
 
@@ -135,6 +138,41 @@ describe('TypeOrmUserRepository', () => {
 
       expect(mockRepo.lastSkip).toBe(0);
       expect(mockRepo.lastTake).toBe(10);
+      expect(mockRepo.lastWhere).toBeUndefined();
+    });
+
+    it('should apply ILike search on fullName and email when search is provided', async () => {
+      mockRepo.findAndCountResult = [[mockOrmEntity], 1];
+
+      await repository.findAll(1, 10, 'john');
+
+      expect(Array.isArray(mockRepo.lastWhere)).toBe(true);
+      const whereArray = mockRepo.lastWhere as Array<Record<string, unknown>>;
+      expect(whereArray.length).toBe(2);
+      expect(whereArray[0]).toHaveProperty('fullName');
+      expect(whereArray[1]).toHaveProperty('email');
+    });
+
+    it('should apply role filter when role is provided without search', async () => {
+      mockRepo.findAndCountResult = [[mockOrmEntity], 1];
+
+      await repository.findAll(1, 10, undefined, UserRole.STAFF);
+
+      expect(mockRepo.lastWhere).toEqual({ role: UserRole.STAFF });
+    });
+
+    it('should combine search and role filter when both are provided', async () => {
+      mockRepo.findAndCountResult = [[mockOrmEntity], 1];
+
+      await repository.findAll(1, 10, 'john', UserRole.STAFF);
+
+      expect(Array.isArray(mockRepo.lastWhere)).toBe(true);
+      const whereArray = mockRepo.lastWhere as Array<Record<string, unknown>>;
+      expect(whereArray.length).toBe(2);
+      expect(whereArray[0]).toHaveProperty('fullName');
+      expect(whereArray[0]).toHaveProperty('role', UserRole.STAFF);
+      expect(whereArray[1]).toHaveProperty('email');
+      expect(whereArray[1]).toHaveProperty('role', UserRole.STAFF);
     });
   });
 

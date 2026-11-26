@@ -179,8 +179,8 @@ Xây dựng mô hình thực thể người dùng (`users`), cơ chế băm mậ
 - [x] Domain Entity `User`, Enum `UserRole`, Value Object `Email`.
 - [x] TypeORM Entity `users` với chỉ mục `id [PK]`, `email [Unique]`, `role [Index]`.
 - [ ] Migration khởi tạo bảng `users` và seeder tài khoản Admin mặc định.
-- [ ] Trọn bộ 6 Use Cases quản lý người dùng.
-- [ ] Controller `UsersController` đáp ứng trọn vẹn hợp đồng API phân hệ 2.
+- [x] Trọn bộ 6 Use Cases quản lý người dùng.
+- [x] Controller `UsersController` đáp ứng trọn vẹn hợp đồng API phân hệ 2.
 
 #### 5. Chiến lược kiểm thử độc lập (Independent Testing)
 - **Unit Test (Use Cases)**:

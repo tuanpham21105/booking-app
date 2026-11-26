@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindOptionsWhere, ILike, Repository } from 'typeorm';
 import { UserRepository } from '../../../domain/repositories/user.repository.port';
 import { User } from '../../../domain/entities/user.entity';
 import { UserRole } from '../../../domain/enums/user-role.enum';
@@ -31,11 +31,30 @@ export class TypeOrmUserRepository extends UserRepository {
     return convertToDomain(User, entity);
   }
 
-  async findAll(page: number = 1, limit: number = 10): Promise<[User[], number]> {
+  async findAll(
+    page: number = 1,
+    limit: number = 10,
+    search?: string,
+    role?: UserRole,
+  ): Promise<[User[], number]> {
     const { skip, take } = calculatePagination(page, limit);
+
+    let where: FindOptionsWhere<UserOrmEntity> | FindOptionsWhere<UserOrmEntity>[] | undefined;
+
+    if (search?.trim()) {
+      const searchTerm = `%${search.trim()}%`;
+      where = [
+        { fullName: ILike(searchTerm), ...(role ? { role } : {}) },
+        { email: ILike(searchTerm), ...(role ? { role } : {}) },
+      ];
+    } else if (role) {
+      where = { role };
+    }
+
     const [entities, total] = await this.userOrmRepository.findAndCount({
       skip,
       take,
+      ...(where !== undefined ? { where } : {}),
       order: { createdAt: 'DESC' },
     });
 
