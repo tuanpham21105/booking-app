@@ -298,7 +298,9 @@ Xây dựng phân hệ quản lý thông tin các đối tác / nhà cung cấp 
 - [x] Domain Entity `Provider` và TypeORM Entity `providers` (chỉ mục unique tên `name`).
 - [x] Migration tạo bảng `providers`.
 - [x] 5 Use Cases quản lý nhà cung cấp.
-- [ ] Controller `ProvidersController` tích hợp `RolesGuard` (`Staff`, `Admin`).
+- [x] Controller `ProvidersController` tích hợp `RolePolicy` (`Staff`, `Admin`).
+
+> **Ghi chú kiến trúc từ Developer Review**: Thay vì chia nhỏ 5 Use Case riêng biệt gây phân mảnh và định nghĩa custom domain exceptions thừa thãi, module `providers` được tinh gọn gộp vào một `ProvidersService` duy nhất tương tự module `users`, sử dụng trực tiếp các HTTP Exceptions chuẩn từ `@nestjs/common` và `RolePolicy` từ `@nestjs/authorization`. Thiết kế này đảm bảo Clean Architecture thực dụng, tránh over-engineering cho quy mô dự án.
 
 #### 5. Chiến lược kiểm thử độc lập (Independent Testing)
 - **Unit Test (Use Cases)**:
@@ -679,7 +681,7 @@ Hoàn thiện chính sách xóa dữ liệu liên kết **Cascade Deletion phụ
 | **Phase 0** | Hạ tầng chung, Clean Architecture, Health Check | Test bootstrap, DB connection, Global Filters | Sẵn sàng |
 | **Phase 1** | Quản lý Người dùng, Admin duy nhất (BR-01, UC-03) | Mock UserRepository, Test BR-01 | Sẵn sàng |
 | **Phase 2** | Xác thực & Phân quyền JWT, RBAC Guards (UC-01, UC-02) | Mock TokenService, Test Jwt/Roles Guard | Sẵn sàng |
-| **Phase 3** | Quản lý Nhà cung cấp (UC-05) | Mock ProviderRepository, Test CRUD & Unique Name | Sẵn sàng |
+| **Phase 3** | Quản lý Nhà cung cấp (UC-05) | Mock ProviderRepository, Test CRUD & Unique Name | Hoàn thành |
 | **Phase 4** | Danh mục Dịch vụ (UC-04, UC-06) | Mock Provider/Service Repos, Test Search | Sẵn sàng |
 | **Phase 5** | Lịch hẹn & Thuật toán chống trùng lịch (BR-02, BR-05, UC-07) | Unit Test thuật toán giao thoa khung giờ | Sẵn sàng |
 | **Phase 6** | Đặt chỗ, Giữ chỗ & Tính phí phạt hủy (BR-02, BR-03, UC-08 $\rightarrow$ UC-11) | State Machine Test, Concurrency & Fee Math Test | Sẵn sàng |

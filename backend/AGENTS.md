@@ -55,7 +55,13 @@ backend/src/
     │   ├── presentation/controllers/    # auth.controller.ts (register, login, me, refresh)
     │   ├── presentation/dto/            # request/response DTOs kèm validation
     │   └── auth.module.ts
-    └── <feature_name>/                  # Các phân hệ tính năng tiếp theo (providers, services, bookings, reports)
+    ├── providers/                       # Phân hệ Quản lý Nhà cung cấp (đã hoàn thiện ở Phase 3)
+    │   ├── domain/                      # Provider Entity, ProviderRepository Port
+    │   ├── application/                 # ProvidersService (CRUD, kiểm tra trùng tên), DTOs
+    │   ├── infrastructure/              # ProviderOrmEntity, TypeOrmProviderRepository Adapter
+    │   ├── presentation/                # ProvidersController (/api/v1/providers), Swagger DTOs
+    │   └── providers.module.ts
+    └── <feature_name>/                  # Các phân hệ tính năng tiếp theo (services, bookings, reports)
         ├── domain/                      # 1. Lõi nghiệp vụ (Domain Layer)
         │   ├── entities/                # Pure Domain Entities (không phụ thuộc TypeORM/NestJS)
         │   ├── value-objects/           # Giá trị bất biến (Money, Email, TimeRange)
