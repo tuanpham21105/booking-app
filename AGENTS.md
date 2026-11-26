@@ -58,7 +58,7 @@ Dưới đây là các **lệnh cấm tuyệt đối** và nguyên tắc an toà
   - Kiến trúc: **Clean Architecture bổ dọc theo từng Module (Vertical Slice Clean Architecture)**.
     - Mỗi module bao gồm: `presentation`, `application`, `domain`, `infrastructure`.
     - Tài nguyên dùng chung đặt tại `src/common/` cũng tổ chức theo Clean Architecture.
-  - Trạng thái phát triển: Đã hoàn thành **Giai đoạn 0: Khung Hạ tầng Dùng chung & Health Check** và **Giai đoạn 1: Quản lý Người dùng (`users`) & Khởi tạo Admin duy nhất**; lộ trình tiếp theo bám sát [docs/plans/backend_development_plan.md](docs/plans/backend_development_plan.md) (Giai đoạn 2: Xác thực & Phân quyền Auth & RBAC).
+  - Trạng thái phát triển: Đã hoàn thành **Giai đoạn 0: Khung Hạ tầng Dùng chung & Health Check**, **Giai đoạn 1: Quản lý Người dùng (`users`) & Khởi tạo Admin duy nhất**, và **Giai đoạn 2: Xác thực & Phân quyền (Auth & RBAC Guards)**; lộ trình tiếp theo bám sát [docs/plans/backend_development_plan.md](docs/plans/backend_development_plan.md) (Giai đoạn 3: Quản lý Nhà cung cấp `providers`).
   - Chi tiết xem tại: [backend/AGENTS.md](backend/AGENTS.md).
 - **Frontend**:
   - React 19 + TypeScript + Vite 8.

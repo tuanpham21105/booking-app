@@ -158,8 +158,8 @@ Lộ trình phát triển được định nghĩa chi tiết tại [docs/plans/b
 | :--- | :--- | :---: | :--- |
 | **Phase 0** | Hạ tầng dùng chung & Health Check | **Hoàn thành** | Khung Clean Architecture, Database connection, Swagger, Global Filter, `GET /api/v1/health` |
 | **Phase 1** | Quản lý Người dùng (`users`) | **Hoàn thành** | Thực thể `users`, tài khoản Admin duy nhất (BR-01), Admin CRUD users, Seed Admin |
-| **Phase 2** | Xác thực & Phân quyền (Auth & RBAC) | **Tiếp theo** | `@nestjs/authentication`, JWT Access/Refresh, `JwtAuthGuard`, `RolesGuard` |
-| **Phase 3** | Quản lý Nhà cung cấp (`providers`) | Chờ | Quản lý đối tác dịch vụ, CRUD providers |
+| **Phase 2** | Xác thực & Phân quyền (Auth & RBAC) | **Hoàn thành** | Sử dụng `@nestjs/authentication` (`JwtBearerProvider`, `TokenService`) & `@nestjs/authorization` (`RolePolicy`) tinh gọn theo định hướng review của Developer |
+| **Phase 3** | Quản lý Nhà cung cấp (`providers`) | **Tiếp theo** | Quản lý đối tác dịch vụ, CRUD providers |
 | **Phase 4** | Danh mục Dịch vụ (`services`) | Chờ | Danh mục dịch vụ theo nhà cung cấp, tìm kiếm public |
 | **Phase 5** | Lịch hẹn & Chỗ trống (`schedules`) | Chờ | Sức chứa `total_slots`, chỗ trống, thuật toán chống trùng lịch BR-05 |
 | **Phase 6** | Đặt chỗ & Vòng đời Booking (`bookings`) | Chờ | Giao dịch lõi, giữ chỗ BR-02, máy trạng thái, chính sách phí hủy BR-03 |

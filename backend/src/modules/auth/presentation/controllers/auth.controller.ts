@@ -26,7 +26,6 @@ import { ErrorMessageDto, ValidationErrorResponseDto } from '../../../../common/
 import { CurrentUser, Public } from '@nestjs/authentication';
 import { AuthenticatedUserPayload } from '../../application/dto/authentication-user-payload.dto';
 import { Can } from '@nestjs/authorization';
-import { RolePolicy } from '../../../../common';
 
 @ApiTags('Authentication')
 @Controller('auth')
