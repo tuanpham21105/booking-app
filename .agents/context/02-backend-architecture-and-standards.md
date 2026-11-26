@@ -51,6 +51,10 @@ Các thành phần dùng chung (Shared Kernel) đã được thiết lập sẵn
 - **`src/common/infrastructure/config/`**:
   - `app.config.ts`: Cấu hình ứng dụng (`PORT`, `NODE_ENV`).
   - `database.config.ts`: Cấu hình PostgreSQL (`host`, `port`, `username`, `password`, `database`).
+  - `admin.config.ts`: Cấu hình tài khoản Admin khởi tạo duy nhất (`INITIAL_ADMIN_NAME`, `INITIAL_ADMIN_EMAIL`, `INITIAL_ADMIN_PASSWORD`).
+- **`src/common/utils/`**:
+  - `entity-converter.util.ts`: Tiện ích ánh xạ dữ liệu giữa Domain Entity và ORM Entity.
+  - `pagination.util.ts`: Tiện ích chuẩn hóa phân trang.
 - **`src/common/infrastructure/database/`**:
   - `database.module.ts`: Khởi tạo `TypeOrmModule.forRootAsync` nạp cấu hình tự động.
   - `data-source.ts`: Cấu hình DataSource độc lập cho TypeORM CLI chạy migrations.
@@ -153,8 +157,8 @@ Lộ trình phát triển được định nghĩa chi tiết tại [docs/plans/b
 | Giai đoạn (Phase) | Tên phân hệ | Trạng thái | Trọng tâm nghiệp vụ |
 | :--- | :--- | :---: | :--- |
 | **Phase 0** | Hạ tầng dùng chung & Health Check | **Hoàn thành** | Khung Clean Architecture, Database connection, Swagger, Global Filter, `GET /api/v1/health` |
-| **Phase 1** | Quản lý Người dùng (`users`) | **Tiếp theo** | Thực thể `users`, tài khoản Admin duy nhất (BR-01), Admin CRUD users |
-| **Phase 2** | Xác thực & Phân quyền (Auth & RBAC) | Chờ | `@nestjs/authentication`, JWT Access/Refresh, `JwtAuthGuard`, `RolesGuard` |
+| **Phase 1** | Quản lý Người dùng (`users`) | **Hoàn thành** | Thực thể `users`, tài khoản Admin duy nhất (BR-01), Admin CRUD users, Seed Admin |
+| **Phase 2** | Xác thực & Phân quyền (Auth & RBAC) | **Tiếp theo** | `@nestjs/authentication`, JWT Access/Refresh, `JwtAuthGuard`, `RolesGuard` |
 | **Phase 3** | Quản lý Nhà cung cấp (`providers`) | Chờ | Quản lý đối tác dịch vụ, CRUD providers |
 | **Phase 4** | Danh mục Dịch vụ (`services`) | Chờ | Danh mục dịch vụ theo nhà cung cấp, tìm kiếm public |
 | **Phase 5** | Lịch hẹn & Chỗ trống (`schedules`) | Chờ | Sức chứa `total_slots`, chỗ trống, thuật toán chống trùng lịch BR-05 |

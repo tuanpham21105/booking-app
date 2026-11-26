@@ -176,11 +176,11 @@ Xây dựng mô hình thực thể người dùng (`users`), cơ chế băm mậ
   5. `IUserRepository.save(user)` $\rightarrow$ trả về thông tin người dùng không bao gồm mật khẩu.
 
 #### 4. Mục tiêu đầu ra (Deliverables)
-- [ ] Domain Entity `User`, Enum `UserRole`, Value Object `Email`.
-- [ ] TypeORM Entity `users` với chỉ mục `id [PK]`, `email [Unique]`, `role [Index]`.
-- [ ] Migration khởi tạo bảng `users` và seeder tài khoản Admin mặc định.
-- [ ] Trọn bộ 6 Use Cases quản lý người dùng.
-- [ ] Controller `UsersController` đáp ứng trọn vẹn hợp đồng API phân hệ 2.
+- [x] Domain Entity `User`, Enum `UserRole`, Value Object `Email`.
+- [x] TypeORM Entity `users` với chỉ mục `id [PK]`, `email [Unique]`, `role [Index]`.
+- [x] Migration khởi tạo bảng `users` và seeder tài khoản Admin mặc định.
+- [x] Trọn bộ 6 Use Cases quản lý người dùng.
+- [x] Controller `UsersController` đáp ứng trọn vẹn hợp đồng API phân hệ 2.
 
 #### 5. Chiến lược kiểm thử độc lập (Independent Testing)
 - **Unit Test (Use Cases)**:

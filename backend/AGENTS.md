@@ -28,12 +28,13 @@ backend/src/
 ├── app.module.ts                        # Root module điều phối
 │
 ├── common/                              # Tài nguyên dùng chung (Shared Kernel)
-│   ├── infrastructure/                  # Cấu hình đa môi trường (app, database) & TypeORM DatabaseModule, DataSource
-│   │   ├── config/                      # app.config.ts, database.config.ts
+│   ├── infrastructure/                  # Cấu hình đa môi trường (app, database, admin) & TypeORM DatabaseModule, DataSource
+│   │   ├── config/                      # app.config.ts, database.config.ts, admin.config.ts
 │   │   └── database/                    # database.module.ts, data-source.ts, migrations/
 │   ├── presentation/                    # Global Exception Filters, DTOs chuẩn hóa phản hồi lỗi
 │   │   ├── filters/                     # http-exception.filter.ts
 │   │   └── dto/                         # error-message.dto.ts, validation-error-response.dto.ts
+│   ├── utils/                           # entity-converter.util.ts, pagination.util.ts
 │   └── common.module.ts                 # Export ConfigModule và DatabaseModule
 │
 └── modules/
@@ -42,7 +43,13 @@ backend/src/
     │   ├── presentation/controllers/    # health.controller.ts
     │   ├── presentation/dto/            # health-check-response.dto.ts
     │   └── health.module.ts
-    └── <feature_name>/                  # Các phân hệ tính năng tiếp theo (users, auth, providers, services, bookings, reports)
+    ├── users/                           # Phân hệ Quản lý Người dùng (Phase 1: hoàn thiện CRUD & Seed Admin duy nhất)
+    │   ├── domain/                      # Pure User Entity, UserRole Enum, UserRepository Port
+    │   ├── application/                 # UsersService (CRUD, BR-01), AdminSeederService, DTOs
+    │   ├── infrastructure/              # UserOrmEntity, TypeOrmUserRepository Adapter
+    │   ├── presentation/                # UsersController (/api/v1/users), Swagger DTOs
+    │   └── users.module.ts
+    └── <feature_name>/                  # Các phân hệ tính năng tiếp theo (auth, providers, services, bookings, reports)
         ├── domain/                      # 1. Lõi nghiệp vụ (Domain Layer)
         │   ├── entities/                # Pure Domain Entities (không phụ thuộc TypeORM/NestJS)
         │   ├── value-objects/           # Giá trị bất biến (Money, Email, TimeRange)
@@ -138,6 +145,6 @@ pnpm test:e2e    # Chạy kiểm thử End-to-End
 
 ## 7. Tài liệu tham chiếu & Lộ trình phát triển
 
-- **Lộ trình phát triển 8 giai đoạn**: [docs/plans/backend_development_plan.md](../docs/plans/backend_development_plan.md) (Hiện tại đã xong Phase 0, tiếp theo là Phase 1: Users Management).
+- **Lộ trình phát triển 8 giai đoạn**: [docs/plans/backend_development_plan.md](../docs/plans/backend_development_plan.md) (Hiện tại đã hoàn thành Phase 0 và Phase 1: Users Management & Seed Admin, tiếp theo là Phase 2: Auth & RBAC Security).
 - **Tiêu chuẩn kiến trúc chi tiết**: [.agents/context/02-backend-architecture-and-standards.md](../.agents/context/02-backend-architecture-and-standards.md).
 - **Quy trình Git & AI Guardrails**: [.agents/context/01-workflow-and-ai-rules.md](../.agents/context/01-workflow-and-ai-rules.md).

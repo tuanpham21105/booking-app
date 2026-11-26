@@ -58,9 +58,11 @@ booking-app/
 │
 ├── backend/                 # Phân hệ Backend (NestJS 12)
 │   ├── src/
-│   │   ├── common/          # Tài nguyên dùng chung (Shared Kernel: config, database, filters, dto)
+│   │   ├── common/          # Tài nguyên dùng chung (Shared Kernel: config, database, filters, dto, utils)
+│   │   ├── scripts/         # Script khởi tạo độc lập (seed-admin.ts)
 │   │   └── modules/         # Các lát cắt tính năng (Vertical Slice)
-│   │       └── health/      # Phân hệ Health Check (giám sát server & CSDL)
+│   │       ├── health/      # Phân hệ Health Check (giám sát server & CSDL)
+│   │       └── users/       # Phân hệ Quản lý Người dùng & Seed Admin duy nhất
 │   ├── test/                # Kiểm thử E2E (app, health) và cấu hình Jest
 │   ├── .env.example         # File biến môi trường mẫu cho Backend Dev
 │   ├── AGENTS.md            # Hướng dẫn chi tiết cho Agent khi làm việc ở Backend
@@ -126,6 +128,9 @@ Bảng các biến môi trường cấu hình cơ bản:
 | `POSTGRES_PORT` | `5432` | Cổng map ra máy host của PostgreSQL |
 | `BACKEND_PORT` / `PORT` | `3000` | Cổng phục vụ API của NestJS Backend |
 | `DB_HOST` | `postgres` | Tên hostname nội bộ của service database trong mạng Docker |
+| `INITIAL_ADMIN_NAME` | `System Admin` | Họ tên tài khoản Quản trị viên khởi tạo |
+| `INITIAL_ADMIN_EMAIL` | `admin@bookingapp.com` | Địa chỉ email của tài khoản Admin duy nhất |
+| `INITIAL_ADMIN_PASSWORD` | `AdminPassword123@` | Mật khẩu tài khoản Admin khởi tạo |
 | `FRONTEND_PORT` | `5173` | Cổng truy cập Web UI của React + Vite |
 | `VITE_API_URL` | `http://localhost:3000/api/v1` | URL tiền tố API Backend mà Frontend sẽ gọi |
 

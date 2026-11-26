@@ -1,6 +1,6 @@
 import { Global, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { appConfig, databaseConfig } from './infrastructure/config';
+import { adminConfig, appConfig, databaseConfig } from './infrastructure/config';
 import { DatabaseModule } from './infrastructure/database/database.module';
 
 @Global()
@@ -8,7 +8,7 @@ import { DatabaseModule } from './infrastructure/database/database.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [appConfig, databaseConfig],
+      load: [appConfig, databaseConfig, adminConfig],
       envFilePath: ['.env', '../.env', '.env.local'],
     }),
     DatabaseModule,
@@ -16,3 +16,4 @@ import { DatabaseModule } from './infrastructure/database/database.module';
   exports: [ConfigModule, DatabaseModule],
 })
 export class CommonModule {}
+
