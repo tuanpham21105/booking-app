@@ -2,6 +2,7 @@ import { Global, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { adminConfig, appConfig, databaseConfig, jwtConfig } from './infrastructure/config';
 import { DatabaseModule } from './infrastructure/database/database.module';
+import { RolePolicy } from './infrastructure/policies/role.policy';
 
 @Global()
 @Module({
@@ -13,7 +14,8 @@ import { DatabaseModule } from './infrastructure/database/database.module';
     }),
     DatabaseModule,
   ],
-  exports: [ConfigModule, DatabaseModule],
+  providers: [RolePolicy],
+  exports: [ConfigModule, DatabaseModule, RolePolicy],
 })
 export class CommonModule {}
 

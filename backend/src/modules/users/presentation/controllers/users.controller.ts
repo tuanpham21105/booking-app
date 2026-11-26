@@ -12,6 +12,7 @@ import {
   Query,
 } from '@nestjs/common';
 import {
+  ApiBearerAuth,
   ApiOperation,
   ApiParam,
   ApiResponse,
@@ -28,9 +29,14 @@ import {
   UserPaginationResponseDto,
   UserQueryDto,
 } from '../dto';
+import { Can } from '@nestjs/authorization';
+import { RolePolicy } from '../../../../common';
+import { UserRole } from '../../domain';
 
+@ApiBearerAuth()
 @ApiTags('Users')
 @Controller('users')
+@Can(RolePolicy, "hasRole", () => [[UserRole.ADMIN]])
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 

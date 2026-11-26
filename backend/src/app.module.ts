@@ -8,6 +8,7 @@ import { UsersModule } from './modules/users';
 import { AuthModule } from './modules/auth';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { AuthorizationModule } from '@nestjs/authorization';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { AppService } from './app.service';
         },
       }),
     }),
+    AuthorizationModule.forRoot(),
   ],
   controllers: [AppController],
   providers: [AppService],

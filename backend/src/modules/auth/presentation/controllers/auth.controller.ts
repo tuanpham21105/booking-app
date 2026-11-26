@@ -5,7 +5,6 @@ import {
   HttpCode,
   HttpStatus,
   Post,
-  UseGuards,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -26,6 +25,8 @@ import {
 import { ErrorMessageDto, ValidationErrorResponseDto } from '../../../../common/presentation/dto';
 import { CurrentUser, Public } from '@nestjs/authentication';
 import { AuthenticatedUserPayload } from '../../application/dto/authentication-user-payload.dto';
+import { Can } from '@nestjs/authorization';
+import { RolePolicy } from '../../../../common';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -106,6 +107,7 @@ export class AuthController {
     description: 'Không tìm thấy dữ liệu người dùng trong cơ sở dữ liệu',
     type: ErrorMessageDto,
   })
+  @Can.Anyone()
   async getProfile(@CurrentUser() user: AuthenticatedUserPayload,
   ): Promise<UserProfileResponseDto> {
     return await this.authService.getProfile(user.id);
