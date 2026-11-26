@@ -295,9 +295,9 @@ Xây dựng phân hệ quản lý thông tin các đối tác / nhà cung cấp 
   3. Khởi tạo Domain Entity `Provider` $\rightarrow$ lưu qua Repository $\rightarrow$ trả về `ProviderDetailDto`.
 
 #### 4. Mục tiêu đầu ra (Deliverables)
-- [ ] Domain Entity `Provider` và TypeORM Entity `providers` (chỉ mục unique tên `name`).
-- [ ] Migration tạo bảng `providers`.
-- [ ] 5 Use Cases quản lý nhà cung cấp.
+- [x] Domain Entity `Provider` và TypeORM Entity `providers` (chỉ mục unique tên `name`).
+- [x] Migration tạo bảng `providers`.
+- [x] 5 Use Cases quản lý nhà cung cấp.
 - [ ] Controller `ProvidersController` tích hợp `RolesGuard` (`Staff`, `Admin`).
 
 #### 5. Chiến lược kiểm thử độc lập (Independent Testing)
