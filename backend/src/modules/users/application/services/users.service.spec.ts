@@ -229,6 +229,22 @@ describe('UsersService', () => {
       expect(mockPasswordHasher.lastPasswordHashed).toBeUndefined();
     });
 
+    it('should create an ADMIN user successfully when allowAdmin is true (system seed)', async () => {
+      const adminDto: CreateUserDto = {
+        fullName: 'System Admin',
+        email: 'admin@bookingapp.com',
+        password: 'AdminPassword123@',
+        role: UserRole.ADMIN,
+      };
+
+      const result = await service.create(adminDto, true);
+
+      expect(mockPasswordHasher.lastPasswordHashed).toBe(adminDto.password);
+      expect(result.role).toBe(UserRole.ADMIN);
+      expect(result.fullName).toBe(adminDto.fullName);
+      expect(result.email).toBe(adminDto.email);
+    });
+
     it('should throw ConflictException when email already exists', async () => {
       await mockUserRepository.create(
         'Existing User',

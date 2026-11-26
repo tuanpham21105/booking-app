@@ -1,3 +1,4 @@
+import { adminConfig } from './admin.config';
 import { appConfig } from './app.config';
 import { databaseConfig } from './database.config';
 
@@ -72,4 +73,29 @@ describe('Config', () => {
       expect(config.database).toBe('custom_db');
     });
   });
+
+  describe('adminConfig', () => {
+    it('should return default values when env vars are missing', () => {
+      delete process.env.INITIAL_ADMIN_NAME;
+      delete process.env.INITIAL_ADMIN_EMAIL;
+      delete process.env.INITIAL_ADMIN_PASSWORD;
+
+      const config = adminConfig();
+      expect(config.name).toBe('System Admin');
+      expect(config.email).toBe('admin@bookingapp.com');
+      expect(config.password).toBe('AdminPassword123@');
+    });
+
+    it('should return parsed values from environment variables', () => {
+      process.env.INITIAL_ADMIN_NAME = 'Super Admin';
+      process.env.INITIAL_ADMIN_EMAIL = 'superadmin@example.com';
+      process.env.INITIAL_ADMIN_PASSWORD = 'CustomAdminPass123!';
+
+      const config = adminConfig();
+      expect(config.name).toBe('Super Admin');
+      expect(config.email).toBe('superadmin@example.com');
+      expect(config.password).toBe('CustomAdminPass123!');
+    });
+  });
 });
+

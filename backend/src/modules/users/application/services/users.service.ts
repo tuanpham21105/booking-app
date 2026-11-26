@@ -19,10 +19,11 @@ export class UsersService {
 
   /**
    * Tạo tài khoản người dùng mới (UC-01, UC-03, BR-01).
-   * Ràng buộc BR-01: Không được phép tạo tài khoản có vai trò ADMIN.
+   * Ràng buộc BR-01: Không được phép tạo tài khoản có vai trò ADMIN qua API thông thường.
+   * Tham số allowAdmin: Cho phép tạo tài khoản Admin duy nhất khi khởi tạo hệ thống (seeding).
    */
-  async create(dto: CreateUserDto): Promise<User> {
-    if (dto.role === UserRole.ADMIN) {
+  async create(dto: CreateUserDto, allowAdmin: boolean = false): Promise<User> {
+    if (dto.role === UserRole.ADMIN && !allowAdmin) {
       throw new BadRequestException('Không được phép tạo tài khoản với vai trò Admin');
     }
 

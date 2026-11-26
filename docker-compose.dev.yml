@@ -43,6 +43,9 @@ services:
       DB_USERNAME: ${POSTGRES_USER:-postgres}
       DB_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       DB_DATABASE: ${POSTGRES_DB:-booking_db}
+      INITIAL_ADMIN_NAME: ${INITIAL_ADMIN_NAME:-System Admin}
+      INITIAL_ADMIN_EMAIL: ${INITIAL_ADMIN_EMAIL:-admin@bookingapp.com}
+      INITIAL_ADMIN_PASSWORD: ${INITIAL_ADMIN_PASSWORD:-AdminPassword123@}
     volumes:
       - ./backend:/app
       - /app/node_modules
