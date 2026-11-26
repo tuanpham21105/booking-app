@@ -358,10 +358,10 @@ Xây dựng phân hệ quản lý danh mục dịch vụ (`services`), liên k�
   4. Khởi tạo Entity `Service` và lưu vào `IServiceRepository`.
 
 #### 4. Mục tiêu đầu ra (Deliverables)
-- [ ] Domain Entity `Service`, TypeORM Entity `services` với quan hệ FK tới `providers`.
-- [ ] Migration tạo bảng `services` (Cascade Delete khi xóa Provider theo BR-04).
-- [ ] Hoàn thiện 5 API endpoint cho phân hệ Services.
-- [ ] Endpoint Public cho phép người dùng chưa đăng nhập vẫn tra cứu và xem chi tiết được dịch vụ.
+- [x] Domain Entity `Service`, TypeORM Entity `services` với quan hệ FK tới `providers`.
+- [x] Migration tạo bảng `services` (Cascade Delete khi xóa Provider theo BR-04).
+- [x] Hoàn thiện 5 API endpoint cho phân hệ Services.
+- [x] Endpoint Public cho phép người dùng chưa đăng nhập vẫn tra cứu và xem chi tiết được dịch vụ.
 
 #### 5. Chiến lược kiểm thử độc lập (Independent Testing)
 - **Unit Test (Use Cases)**:

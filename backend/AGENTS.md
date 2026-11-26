@@ -55,13 +55,19 @@ backend/src/
     │   ├── presentation/controllers/    # auth.controller.ts (register, login, me, refresh)
     │   ├── presentation/dto/            # request/response DTOs kèm validation
     │   └── auth.module.ts
-    ├── providers/                       # Phân hệ Quản lý Nhà cung cấp (đã hoàn thiện ở Phase 3)
+    ├── providers/                       # Phân hệ Quản lý Nhà cung cấp (Phase 3: CRUD & cascade quan hệ với services)
     │   ├── domain/                      # Provider Entity, ProviderRepository Port
     │   ├── application/                 # ProvidersService (CRUD, kiểm tra trùng tên), DTOs
     │   ├── infrastructure/              # ProviderOrmEntity, TypeOrmProviderRepository Adapter
     │   ├── presentation/                # ProvidersController (/api/v1/providers), Swagger DTOs
     │   └── providers.module.ts
-    └── <feature_name>/                  # Các phân hệ tính năng tiếp theo (services, bookings, reports)
+    ├── services/                        # Phân hệ Danh mục Dịch vụ (Phase 4: CRUD, liên kết Provider & Cascade delete)
+    │   ├── domain/                      # Service Entity, ServiceRepository Port
+    │   ├── application/                 # ServicesService (CRUD, kiểm tra tồn tại Provider), DTOs
+    │   ├── infrastructure/              # ServiceOrmEntity, TypeOrmServiceRepository Adapter
+    │   ├── presentation/                # ServicesController (/api/v1/services), Swagger DTOs
+    │   └── services.module.ts
+    └── <feature_name>/                  # Các phân hệ tính năng tiếp theo (schedules, bookings, reports)
         ├── domain/                      # 1. Lõi nghiệp vụ (Domain Layer)
         │   ├── entities/                # Pure Domain Entities (không phụ thuộc TypeORM/NestJS)
         │   ├── value-objects/           # Giá trị bất biến (Money, Email, TimeRange)
@@ -88,11 +94,15 @@ backend/src/
         └── <feature_name>.module.ts     # NestJS Module wiring dependencies
 ```
 
-### Nguyên tắc phụ thuộc (Dependency Rule)
+### Nguyên tắc phụ thuộc (Dependency Rule) & Liên kết thực thể tinh gọn
 - `Domain` không phụ thuộc bất kỳ layer nào khác, không chứa decorator của TypeORM hay NestJS.
 - `Application` chỉ phụ thuộc `Domain`.
 - `Infrastructure` và `Presentation` phụ thuộc `Application` và `Domain`.
 - Giao tiếp giữa `Application` và `Infrastructure` thông qua Repository Interfaces (Dependency Inversion).
+- **Tái sử dụng Domain Entity giữa các Module (Tránh Over-engineering)**:
+  - Cho phép sử dụng xen lẫn (reuse) các Pure Domain Entity giữa các module chức năng (ví dụ: `Provider` chứa `services?: Service[]`, `Service` chứa `provider?: Provider`).
+  - Tuyệt đối tránh việc nhân bản (duplicate) hoặc tạo lại entity/interface phụ ở mỗi module làm tăng độ phức tạp không cần thiết.
+  - Khi cần ánh xạ quan hệ lồng nhau từ TypeORM Entity sang Domain Entity, xử lý trực tiếp tại Repository Adapter bằng `convertToDomainList` hoặc `convertToDomain` (thay vì viết mapper cồng kềnh).
 
 ---
 
@@ -123,7 +133,10 @@ backend/src/
 
 - Sử dụng package official `@nestjs/authentication`.
 - Tách biệt logic xác thực (Auth Use Cases) tại `modules/auth/application/use-cases/`.
-- Bảo vệ các endpoint bằng Guards và Decorators tại `common/presentation/`.
+- Bảo vệ các endpoint bằng Guards và Decorators tại `common/presentation/` hoặc `@nestjs/authorization` (`@Can`).
+- **Cơ chế chặn mặc định & Decorator `@Public()`**:
+  - Mặc định `@nestjs/authentication` sẽ chặn mọi request không kèm Bearer token (trả về `401 Unauthorized`).
+  - Do đó, bất kỳ endpoint công khai nào (Public Endpoint - ví dụ: `GET /api/v1/health`, `POST /api/v1/auth/login`, `POST /api/v1/auth/register`, `GET /api/v1/services`, `GET /api/v1/services/:id`) **bắt buộc phải gắn decorator `@Public()`** được import từ `@nestjs/authentication`.
 
 ---
 

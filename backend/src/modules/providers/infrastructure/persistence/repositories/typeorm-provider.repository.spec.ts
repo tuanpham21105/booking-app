@@ -17,8 +17,14 @@ class MockProviderOrmRepository {
   savedEntity?: ProviderOrmEntity;
   deletedId?: number;
 
-  async findOne(options: { where: Record<string, unknown> }): Promise<ProviderOrmEntity | null> {
+  lastFindOneRelations?: unknown;
+
+  async findOne(options: {
+    where: Record<string, unknown>;
+    relations?: unknown;
+  }): Promise<ProviderOrmEntity | null> {
     this.lastFindOneWhere = options.where;
+    this.lastFindOneRelations = options.relations;
     return this.findOneResult;
   }
 

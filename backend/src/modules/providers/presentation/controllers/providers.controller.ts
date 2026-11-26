@@ -169,7 +169,11 @@ export class ProvidersController {
       description: provider.description ?? null,
       createdAt: provider.createdAt,
       updatedAt: provider.updatedAt,
-      services: [],
+      services: (provider.services ?? []).map((service) => ({
+        id: service.id!,
+        name: service.name,
+        price: Number(service.price),
+      })),
     };
   }
 }
