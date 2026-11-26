@@ -43,6 +43,8 @@ Mỗi khi người dùng yêu cầu tạo mẫu khai báo Pull Request, AI Agent
 
 ## 3. Cấu trúc Mẫu khai báo Pull Request chuẩn
 
+**Nguyên tắc trình bày bắt buộc**: Mẫu khai báo PR phải viết **tổng quan, ngắn gọn, súc tích (high-level, concise)**; tập trung làm nổi bật mục tiêu chính, kiến trúc cốt lõi và các nhóm thay đổi chính. Tuyệt đối tránh liệt kê vụn vặt từng dòng/từng hàm hay viết diễn giải lê thê, dài dòng.
+
 Mẫu khai báo Pull Request phải dựa trên **toàn bộ nội dung thay đổi trên branch hiện tại**, gồm các phần bắt buộc sau:
 
 ### 3.1. Tiêu đề Pull Request (PR Title)

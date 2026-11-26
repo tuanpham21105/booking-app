@@ -26,10 +26,11 @@ Dưới đây là các **lệnh cấm tuyệt đối** và nguyên tắc an toà
      - Nếu branch hiện tại là `main`, `develop` hoặc một branch không phải nhánh task: **Agent TUYỆT ĐỐI KHÔNG ĐƯỢC LÀM GÌ CẢ (không tạo mẫu khai báo PR)** mà phải dừng lại và **báo ngay cho Developer** rằng đang đứng ở nhánh chính (`main`/`develop`), không phải nhánh task nên không tạo Pull Request.
      - Nếu branch là nhánh task hợp lệ (ví dụ: `docs/BE-7-...`, `feat/...`, `fix/...`): Phân tích toàn bộ nội dung thay đổi trên branch hiện tại so với branch gốc (`develop`/`main`) để tạo báo cáo.
   2. **Cấu trúc mẫu khai báo PR bắt buộc**:
+     - **Nguyên tắc trình bày**: Bắt buộc viết **tổng quan, ngắn gọn, súc tích (high-level, concise)**; tập trung vào mục tiêu và thay đổi cốt lõi, tránh liệt kê chi tiết vụn vặt từng hàm/từng file hay giải thích rườm rà.
      - **Tiêu đề Pull Request (PR Title)**: Đặt theo chuẩn Conventional Commits khớp mã task (ví dụ: `docs(BE-7): plan overview backend development roadmap`).
-     - **Tổng quan thay đổi (Summary of Changes)**: Dựa trên toàn bộ diff thực tế trên branch hiện tại.
-     - **Khai báo mức độ sử dụng AI**: Phân định rõ thành phần do AI sinh (AI-Generated).
-     - **Phương thức kiểm chứng (Verification Steps)**: Checklist linter, build, test coverage, tuân thủ an toàn dữ liệu. phần do con người làm, kiểm chứng.
+     - **Tổng quan thay đổi (Summary of Changes)**: Tóm lược súc tích toàn bộ diff thực tế trên branch hiện tại.
+     - **Khai báo mức độ sử dụng AI**: Phân định rõ thành phần do AI sinh (AI-Generated) và vai trò định hướng/kiểm duyệt của Developer.
+     - **Phương thức kiểm chứng (Verification Steps)**: Checklist ngắn gọn về linter, build, test coverage, an toàn dữ liệu và review thủ công.
   3. **Tự động tạo file trong `docs/pull_requests/`**: Khi Developer yêu cầu "mẫu khai báo pull request", Agent phải tự động phân tích toàn bộ thay đổi, tạo 1 file markdown (`.md`) chứa toàn bộ nội dung khai báo PR đặt trong thư mục `docs/pull_requests/` (đặt tên file theo mã task hoặc tên nhánh, ví dụ: `docs/pull_requests/<task-id>.md` hoặc `docs/pull_requests/<tên-nhánh>.md`), đồng thời xuất nội dung ra phản hồi kèm đường dẫn tương đối của file vừa tạo.
   4. Chi tiết xem tại: [.agents/context/01-workflow-and-ai-rules.md](.agents/context/01-workflow-and-ai-rules.md).
 
@@ -58,7 +59,7 @@ Dưới đây là các **lệnh cấm tuyệt đối** và nguyên tắc an toà
   - Kiến trúc: **Clean Architecture bổ dọc theo từng Module (Vertical Slice Clean Architecture)**.
     - Mỗi module bao gồm: `presentation`, `application`, `domain`, `infrastructure`.
     - Tài nguyên dùng chung đặt tại `src/common/` cũng tổ chức theo Clean Architecture.
-  - Trạng thái phát triển: Đã hoàn thành **Giai đoạn 0: Khung Hạ tầng Dùng chung & Health Check**, **Giai đoạn 1: Quản lý Người dùng (`users`) & Khởi tạo Admin duy nhất**, và **Giai đoạn 2: Xác thực & Phân quyền (Auth & RBAC Guards)**; lộ trình tiếp theo bám sát [docs/plans/backend_development_plan.md](docs/plans/backend_development_plan.md) (Giai đoạn 3: Quản lý Nhà cung cấp `providers`).
+  - Trạng thái phát triển: Đã hoàn thành **Giai đoạn 0: Khung Hạ tầng Dùng chung & Health Check**, **Giai đoạn 1: Quản lý Người dùng (`users`) & Khởi tạo Admin duy nhất**, **Giai đoạn 2: Xác thực & Phân quyền (Auth & RBAC Guards)**, và **Giai đoạn 3: Quản lý Nhà cung cấp (`providers`)**; lộ trình tiếp theo bám sát [docs/plans/backend_development_plan.md](docs/plans/backend_development_plan.md) (Giai đoạn 4: Danh mục Dịch vụ `services`).
   - Chi tiết xem tại: [backend/AGENTS.md](backend/AGENTS.md).
 - **Frontend**:
   - React 19 + TypeScript + Vite 8.

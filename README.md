@@ -63,7 +63,8 @@ booking-app/
 │   │   └── modules/         # Các lát cắt tính năng (Vertical Slice)
 │   │       ├── health/      # Phân hệ Health Check (giám sát server & CSDL)
 │   │       ├── users/       # Phân hệ Quản lý Người dùng & Seed Admin duy nhất
-│   │       └── auth/        # Phân hệ Xác thực & Cấp quyền JWT (Access/Refresh Token)
+│   │       ├── auth/        # Phân hệ Xác thực & Cấp quyền JWT (Access/Refresh Token)
+│   │       └── providers/   # Phân hệ Quản lý Nhà cung cấp (đối tác dịch vụ)
 │   ├── test/                # Kiểm thử E2E (app, health) và cấu hình Jest
 │   ├── .env.example         # File biến môi trường mẫu cho Backend Dev
 │   ├── AGENTS.md            # Hướng dẫn chi tiết cho Agent khi làm việc ở Backend
