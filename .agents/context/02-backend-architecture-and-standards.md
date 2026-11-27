@@ -42,7 +42,7 @@ src/modules/<feature_name>/
 3. **Infrastructure & Presentation**: Đóng vai trò Adapters, phụ thuộc vào `Application` và `Domain`.
 4. **Không bỏ qua Mapper**: TypeORM Entity chỉ sống ở Infrastructure; Controller/UseCase chỉ làm việc với Domain Entity hoặc DTO.
 5. **Tái sử dụng Domain Entity giữa các Module (Tránh Over-engineering)**: Cho phép sử dụng xen lẫn các Pure Domain Entity giữa các module chức năng (ví dụ `Provider` chứa `services?: Service[]`, `Service` chứa `provider?: Provider`). Không duplicate entity/interface phụ gây phức tạp hóa mã nguồn.
-6. **Bảo vệ API & Decorator `@Public()`**: Mặc định `@nestjs/authentication` chặn mọi request không kèm token. Bất kỳ API public nào (`/health`, `/auth/login`, `/auth/register`, `/services`, v.v.) bắt buộc phải gắn `@Public()` từ `@nestjs/authentication`.
+6. **Bảo vệ API & Decorator `@Public()`**: Mặc định `@nestjs/authentication` chặn mọi request không kèm token. Bất kỳ API public nào (`/health`, `/auth/login`, `/auth/register`, `/services`, `/schedules` v.v.) bắt buộc phải gắn `@Public()` từ `@nestjs/authentication`.
 
 ---
 
