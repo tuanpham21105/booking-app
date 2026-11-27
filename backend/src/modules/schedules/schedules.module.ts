@@ -5,13 +5,14 @@ import { ScheduleRepository } from './domain/repositories/schedule.repository.po
 import { ScheduleOrmEntity } from './infrastructure/persistence/entities/schedule.orm-entity';
 import { TypeOrmScheduleRepository } from './infrastructure/persistence/repositories/typeorm-schedule.repository';
 import { SchedulesService } from './application/services/schedules.service';
+import { SchedulesController } from './presentation/controllers/schedules.controller';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([ScheduleOrmEntity]),
     ServicesModule,
   ],
-  controllers: [],
+  controllers: [SchedulesController],
   providers: [
     {
       provide: ScheduleRepository,
