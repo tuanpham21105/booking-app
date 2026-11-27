@@ -1,4 +1,5 @@
 import { Provider } from '../../../providers/domain/entities/provider.entity';
+import type { Schedule } from '../../../schedules/domain/entities/schedule.entity';
 
 /**
  * Domain Service Entity thiết kế bằng TypeScript thuần,
@@ -13,6 +14,7 @@ export class Service {
   createdAt?: Date;
   updatedAt?: Date;
   provider?: Provider;
+  schedules?: Schedule[];
 
   constructor(
     providerId: number,
@@ -23,6 +25,7 @@ export class Service {
     createdAt?: Date,
     updatedAt?: Date,
     provider?: Provider,
+    schedules?: Schedule[],
   ) {
     this.providerId = providerId;
     this.name = name;
@@ -32,5 +35,6 @@ export class Service {
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
     this.provider = provider;
+    this.schedules = schedules;
   }
 }

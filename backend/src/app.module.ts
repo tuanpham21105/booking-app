@@ -8,6 +8,7 @@ import { UsersModule } from './modules/users';
 import { AuthModule } from './modules/auth';
 import { ProvidersModule } from './modules/providers';
 import { ServicesModule } from './modules/services';
+import { SchedulesModule } from './modules/schedules';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthorizationModule } from '@nestjs/authorization';
@@ -20,6 +21,7 @@ import { AuthorizationModule } from '@nestjs/authorization';
     AuthModule,
     ProvidersModule,
     ServicesModule,
+    SchedulesModule,
     AuthenticationModule.forRootAsync({
       inject: [jwtConfig.KEY],
       useFactory: (jwt: ConfigType<typeof jwtConfig>) => ({
