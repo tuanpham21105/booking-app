@@ -4,6 +4,7 @@ import { ServicesModule } from '../services';
 import { ScheduleRepository } from './domain/repositories/schedule.repository.port';
 import { ScheduleOrmEntity } from './infrastructure/persistence/entities/schedule.orm-entity';
 import { TypeOrmScheduleRepository } from './infrastructure/persistence/repositories/typeorm-schedule.repository';
+import { SchedulesService } from './application/services/schedules.service';
 
 @Module({
   imports: [
@@ -16,7 +17,8 @@ import { TypeOrmScheduleRepository } from './infrastructure/persistence/reposito
       provide: ScheduleRepository,
       useClass: TypeOrmScheduleRepository,
     },
+    SchedulesService,
   ],
-  exports: [TypeOrmModule, ScheduleRepository, ServicesModule],
+  exports: [TypeOrmModule, ScheduleRepository, SchedulesService, ServicesModule],
 })
 export class SchedulesModule {}
