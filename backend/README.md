@@ -67,7 +67,13 @@ backend/src/
     │   ├── infrastructure/              # ServiceOrmEntity, TypeOrmServiceRepository Adapter
     │   ├── presentation/                # ServicesController (/api/v1/services), Swagger DTOs
     │   └── services.module.ts
-    └── <feature_name>/                  # Các phân hệ tiếp theo (schedules, bookings, reports)
+    ├── schedules/                       # Phân hệ Quản lý Lịch hẹn & Chỗ trống (đã hoàn thiện ở Phase 5)
+    │   ├── domain/                      # Schedule Entity, ScheduleRepository Port
+    │   ├── application/                 # SchedulesService (CRUD, BR-05, chặn ngày quá khứ), DTOs
+    │   ├── infrastructure/              # ScheduleOrmEntity, TypeOrmScheduleRepository Adapter
+    │   ├── presentation/                # SchedulesController (/api/v1/schedules), Swagger DTOs
+    │   └── schedules.module.ts
+    └── <feature_name>/                  # Các phân hệ tiếp theo (bookings, reports)
         ├── domain/                      # 1. Lõi nghiệp vụ (Domain Layer)
         │   ├── entities/                # Pure Domain Entities (không phụ thuộc framework/ORM)
         │   ├── value-objects/           # Giá trị bất biến (Money, Email, TimeRange, Capacity)
@@ -288,6 +294,12 @@ pnpm run migration:show
   - `POST /api/v1/services`: Tạo mới dịch vụ cho nhà cung cấp (quyền `STAFF`, `ADMIN`).
   - `PATCH /api/v1/services/:id`: Cập nhật tên, mô tả, giá niêm yết hoặc nhà cung cấp.
   - `DELETE /api/v1/services/:id`: Xóa dịch vụ (cascade xóa lịch hẹn và booking liên quan).
+- **Quản lý Lịch hẹn & Chỗ trống (`/api/v1/schedules`)**:
+  - `GET /api/v1/schedules`: Xem danh sách lịch hẹn phân trang, lọc theo dịch vụ, ngày cụ thể hoặc khoảng ngày (`Public`).
+  - `GET /api/v1/schedules/:id`: Xem chi tiết lịch hẹn kèm số chỗ trống (`Public`).
+  - `POST /api/v1/schedules`: Tạo mới lịch hẹn, tự động kiểm tra chống trùng/chồng lấn giờ theo BR-05 (quyền `STAFF`, `ADMIN`).
+  - `PATCH /api/v1/schedules/:id`: Cập nhật khung giờ hoặc số chỗ, tự động kiểm tra chống chồng lấn (quyền `STAFF`, `ADMIN`).
+  - `DELETE /api/v1/schedules/:id`: Xóa lịch hẹn và tự động dọn dẹp các booking liên kết (quyền `STAFF`, `ADMIN`).
 
 ---
 

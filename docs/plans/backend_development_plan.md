@@ -422,10 +422,12 @@ Xây dựng phân hệ quản lý khung giờ lịch hẹn (`schedules`), kiểm
   5. Nếu không trùng $\rightarrow$ Lưu lịch mới, trả về `ScheduleDetailDto` với `availableSlots = totalSlots`.
 
 #### 4. Mục tiêu đầu ra (Deliverables)
-- [ ] Domain Entity `Schedule` và TypeORM Entity `schedules`.
-- [ ] Migration bảng `schedules` kèm khóa ngoại liên kết tới `services`.
-- [ ] Thuật toán kiểm tra trùng lịch (BR-05) được đóng gói thành Domain Service chuẩn mực.
-- [ ] 5 API endpoint quản lý lịch hẹn, hỗ trợ tính toán số chỗ trống tự động.
+- [x] Domain Entity `Schedule` và TypeORM Entity `schedules`.
+- [x] Migration bảng `schedules` kèm khóa ngoại liên kết tới `services`.
+- [x] Thuật toán kiểm tra trùng lịch (BR-05) được đóng gói và tích hợp chặt chẽ.
+- [x] 5 API endpoint quản lý lịch hẹn, hỗ trợ tính toán số chỗ trống tự động.
+
+> **Ghi chú kiến trúc từ Developer Review**:  Quyền truy cập cho 2 API tra cứu lịch (`GET /api/v1/schedules` và `GET /api/v1/schedules/:id`) được mở sang `Public` (API Contract v1.0.1).
 
 #### 5. Chiến lược kiểm thử độc lập (Independent Testing)
 - **Unit Test (Kiểm tra thuật toán BR-05)**:

@@ -6,9 +6,11 @@ import {
   UpdateDateColumn,
   Index,
   ManyToOne,
+  OneToMany,
   JoinColumn,
 } from 'typeorm';
 import { ProviderOrmEntity } from '../../../../providers/infrastructure/persistence/entities/provider.orm-entity';
+import type { ScheduleOrmEntity } from '../../../../schedules/infrastructure/persistence/entities/schedule.orm-entity';
 
 @Entity('services')
 export class ServiceOrmEntity {
@@ -60,4 +62,7 @@ export class ServiceOrmEntity {
   })
   @JoinColumn({ name: 'provider_id' })
   provider: ProviderOrmEntity;
+
+  @OneToMany('ScheduleOrmEntity', 'service')
+  schedules: ScheduleOrmEntity[];
 }

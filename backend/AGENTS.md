@@ -67,7 +67,13 @@ backend/src/
     │   ├── infrastructure/              # ServiceOrmEntity, TypeOrmServiceRepository Adapter
     │   ├── presentation/                # ServicesController (/api/v1/services), Swagger DTOs
     │   └── services.module.ts
-    └── <feature_name>/                  # Các phân hệ tính năng tiếp theo (schedules, bookings, reports)
+    ├── schedules/                       # Phân hệ Quản lý Lịch hẹn & Chỗ trống (Phase 5: CRUD, chống trùng lịch BR-05, liên kết Services & Cascade delete)
+    │   ├── domain/                      # Schedule Entity, ScheduleRepository Port
+    │   ├── application/                 # SchedulesService (CRUD, BR-05, chặn quá khứ), DTOs
+    │   ├── infrastructure/              # ScheduleOrmEntity, TypeOrmScheduleRepository Adapter
+    │   ├── presentation/                # SchedulesController (/api/v1/schedules), Swagger DTOs
+    │   └── schedules.module.ts
+    └── <feature_name>/                  # Các phân hệ tính năng tiếp theo (bookings, reports)
         ├── domain/                      # 1. Lõi nghiệp vụ (Domain Layer)
         │   ├── entities/                # Pure Domain Entities (không phụ thuộc TypeORM/NestJS)
         │   ├── value-objects/           # Giá trị bất biến (Money, Email, TimeRange)

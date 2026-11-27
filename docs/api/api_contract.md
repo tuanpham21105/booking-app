@@ -1,6 +1,6 @@
 # TÀI LIỆU ĐẶC TẢ HỢP ĐỒNG API (API CONTRACT SPECIFICATION)
 ## DỰ ÁN: BOOKING APP (DEMO VERSION)
-### Phiên bản tài liệu: Version 1 (v1)
+### Phiên bản tài liệu: Version 1.0.1 (v1.0.1)
 ### Tiêu chuẩn thiết kế: RESTful API & NestJS 12 Framework Standard
 
 ---
@@ -9,6 +9,7 @@
 
 | Phiên bản (Version) | Ngày cập nhật | Người thực hiện | Tóm tắt các thay đổi so với phiên bản trước |
 | :--- | :--- | :--- | :--- |
+| **v1.0.1** | 2026-11-27 | System Architect / AI Agent | **Bản vá nhỏ (Minor Patch Release)**:<br>• Mở quyền Public cho 2 API tra cứu lịch hẹn: `GET /api/v1/schedules` (danh sách lịch) và `GET /api/v1/schedules/:id` (chi tiết lịch) nhằm phục vụ khách vãng lai và khách hàng xem trực tiếp lịch và số chỗ trống.<br>• Loại bỏ yêu cầu Bearer Token bắt buộc và mã lỗi 401/403 cho 2 endpoint trên. |
 | **v1.0.0** | 2026-11-24 | System Architect / AI Agent | **Phiên bản khởi tạo đầu tiên (Initial Baseline Release)**:<br>• Thiết kế toàn bộ API Contract theo chuẩn RESTful cho Booking App.<br>• Ánh xạ toàn diện từ Đặc tả nghiệp vụ (Requirements Specification v1) và CSDL quan hệ (DBML Schema v1).<br>• Cung cấp đầy đủ 8 nhóm tài nguyên API với tiền tố định tuyến `/api/v1`: Xác thực (Auth), Quản lý người dùng (Users), Nhà cung cấp (Providers), Dịch vụ (Services), Lịch hẹn (Schedules), Đặt chỗ (Bookings), Báo cáo thống kê (Reports) và Giám sát hệ thống (Health).<br>• Quy chuẩn cấu trúc phản hồi lỗi thống nhất theo cơ chế NestJS Exception Filters (gồm `statusCode`, `message`, `error`, `timestamp`, `path`).<br>• Quy định tham chiếu toàn bộ Request/Response Body Objects tại phần Data Dictionary ở cuối tài liệu. |
 
 ---
@@ -488,11 +489,11 @@ Hệ thống sử dụng cơ chế xử lý lỗi chuẩn hóa của **NestJS Ex
 ### PHÂN HỆ 5: QUẢN LÝ LỊCH HẸN & CHỖ TRỐNG (SCHEDULES - `/api/v1/schedules`)
 
 #### 5.1. Xem danh sách lịch hẹn (List Schedules)
-* **Mục đích**: Nhân viên xem danh sách lịch, lọc theo dịch vụ, theo ngày, kiểm tra tổng số chỗ, số chỗ đã đặt và số chỗ còn trống (UC-07, BR-02).
+* **Mục đích**: Người dùng (Khách vãng lai, Khách hàng, Nhân viên, Admin) xem danh sách lịch, lọc theo dịch vụ, theo ngày, kiểm tra tổng số chỗ, số chỗ đã đặt và số chỗ còn trống (UC-04, UC-07, BR-02).
 * **HTTP Method**: `GET`
 * **Path**: `/api/v1/schedules`
-* **Quyền hạn (Permission)**: `Staff`, `Admin`
-* **Request Headers**: `Authorization: Bearer <access_token>`
+* **Quyền hạn (Permission)**: `Public` (Khách vãng lai, Customer, Staff, Admin)
+* **Request Headers**: Không bắt buộc (Nếu có: `Authorization: Bearer <access_token>`)
 * **Query Parameters**:
   * `page` (optional, integer, default: 1): Trang hiện tại.
   * `limit` (optional, integer, default: 10): Số bản ghi trên trang.
@@ -506,18 +507,16 @@ Hệ thống sử dụng cơ chế xử lý lỗi chuẩn hóa của **NestJS Ex
   * **Mô tả**: Trả về danh sách lịch kèm thông tin chỗ còn trống và phân trang.
   * **Response Body**: Tham chiếu `[SchedulePaginationResponseDto](#schedulepaginationresponsedto)`
 * **Error Responses**:
-  * `401 Unauthorized`: Chưa xác thực $\rightarrow$ Trả về `[ErrorMessageDto](#errormessagedto)`
-  * `403 Forbidden`: Không có quyền Staff/Admin $\rightarrow$ Trả về `[ErrorMessageDto](#errormessagedto)`
   * `500 Internal Server Error`: Lỗi hệ thống $\rightarrow$ Trả về `[ErrorMessageDto](#errormessagedto)`
 
 ---
 
 #### 5.2. Xem chi tiết lịch hẹn (Get Schedule Details)
-* **Mục đích**: Xem chi tiết một lịch hẹn cụ thể (UC-07).
+* **Mục đích**: Người dùng (Khách vãng lai, Khách hàng, Nhân viên, Admin) xem chi tiết một lịch hẹn cụ thể (UC-04, UC-07).
 * **HTTP Method**: `GET`
 * **Path**: `/api/v1/schedules/:id`
-* **Quyền hạn (Permission)**: `Staff`, `Admin`, `Customer`
-* **Request Headers**: `Authorization: Bearer <access_token>`
+* **Quyền hạn (Permission)**: `Public` (Khách vãng lai, Customer, Staff, Admin)
+* **Request Headers**: Không bắt buộc (Nếu có: `Authorization: Bearer <access_token>`)
 * **URL Path Parameters**:
   * `id` (integer, required): ID lịch hẹn cần xem.
 * **Request Body**: Không có
@@ -526,7 +525,6 @@ Hệ thống sử dụng cơ chế xử lý lỗi chuẩn hóa của **NestJS Ex
   * **Mô tả**: Trả về chi tiết lịch, thời gian bắt đầu, thời lượng, tổng số chỗ, số chỗ đã đặt và số chỗ còn trống.
   * **Response Body**: Tham chiếu `[ScheduleDetailDto](#scheduledetaildto)`
 * **Error Responses**:
-  * `401 Unauthorized`: Chưa đăng nhập $\rightarrow$ Trả về `[ErrorMessageDto](#errormessagedto)`
   * `404 Not Found`: Không tìm thấy lịch $\rightarrow$ Trả về `[ErrorMessageDto](#errormessagedto)`
   * `500 Internal Server Error`: Lỗi máy chủ $\rightarrow$ Trả về `[ErrorMessageDto](#errormessagedto)`
 
